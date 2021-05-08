@@ -289,9 +289,9 @@ int main(int argc, char* argv[])
     // ComputeNormals(&campfireModel);
     // BuildTrianglesAndAddToVirtualScene(&campfireModel);
 
-    // ObjModel spiderModel("../../spider.obj");
-    // ComputeNormals(&spiderModel);
-    // BuildTrianglesAndAddToVirtualScene(&spiderModel);
+     ObjModel spiderModel("../../spider.obj");
+     ComputeNormals(&spiderModel);
+     BuildTrianglesAndAddToVirtualScene(&spiderModel);
 
     if ( argc > 1 )
     {
@@ -428,11 +428,11 @@ int main(int argc, char* argv[])
         // glUniform1i(object_id_uniform, CAMPFIRE);
         // DrawVirtualObject("campfire");
 
-        // Desenhamos o plano do chão
-        // model = Matrix_Translate(6.0f,0.0f,0.0f);
-        // glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        // glUniform1i(object_id_uniform, SPIDER);
-        // DrawVirtualObject("BaseSpiderMan_Mesh_Model001_24_GTAMtl_1.0_0.0_0.001");
+         //Desenhamos o plano do chão
+         model = Matrix_Translate(6.0f,0.0f,0.0f);
+         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+         glUniform1i(object_id_uniform, SPIDER);
+         DrawVirtualObject("spider");
 
         // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
         // passamos por todos os sistemas de coordenadas armazenados nas
