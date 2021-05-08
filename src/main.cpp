@@ -1158,6 +1158,13 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         // cursor como sendo a última posição conhecida do cursor.
         g_LastCursorPosX = xpos;
         g_LastCursorPosY = ypos;
+
+        float r = g_CameraDistance;
+        float y = r * sin(g_CameraPhi);
+        float z = r * cos(g_CameraPhi) * cos(g_CameraTheta);
+        float x = r * cos(g_CameraPhi) * sin(g_CameraTheta);
+
+        cameraLookAt_l_g = glm::vec4(x,y,z,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
     }
 
     if (g_RightMouseButtonPressed)
