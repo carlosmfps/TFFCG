@@ -5,7 +5,7 @@
 //    INF01047 Fundamentos de Computação Gráfica
 //               Prof. Eduardo Gastal
 //
-//                   LABORATÓRIO 5
+//                   TRABALHO FINAL
 //
 
 // Arquivos "headers" padrões de C podem ser incluídos em um
@@ -167,6 +167,21 @@ float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
 float g_CameraDistance = 3.5f; // Distância da câmera para a origem
 
+glm::vec4 cameraPosition_c_g = glm::vec4(0.0f, 0.0f, 2.5f, 1.0f);
+glm::vec4 cameraLookAt_l_g = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+glm::vec4 cameraViewVector_g = cameraLookAt_l_g - cameraPosition_c_g;
+glm::vec4 cameraUpVector_g = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+glm::vec4 cameraOrtoVector_g = cameraUpVector_g * (-cameraViewVector_g);
+
+// Variável que controla qual câmera usaremos: look-at ou free-cam.
+bool g_lookAt = false;
+
+// Variaveis de movimentação da camera Free Look
+bool g_KeyPressedW = false;
+bool g_KeyPressedS = false;
+bool g_KeyPressedA = false;
+bool g_KeyPressedD = false;
+
 // Variáveis que controlam rotação do antebraço
 float g_ForearmAngleZ = 0.0f;
 float g_ForearmAngleX = 0.0f;
@@ -224,7 +239,7 @@ int main(int argc, char* argv[])
     // Criamos uma janela do sistema operacional, com 800 colunas e 600 linhas
     // de pixels, e com título "INF01047 ...".
     GLFWwindow* window;
-    window = glfwCreateWindow(800, 600, "INF01047 - 00291334 - Carlos Santiago", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "INF01047 - Trabalho Final 2020/2 - Carlos Santiago & Gabriel Martins", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -302,6 +317,14 @@ int main(int argc, char* argv[])
     // Inicializamos o código para renderização de texto.
     TextRendering_Init();
 
+    // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
+    // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
+    // (GPU)! Veja arquivo "shader_vertex.glsl".
+    GLint model_uniform           = glGetUniformLocation(program_id, "model"); // Variável da matriz "model"
+    GLint view_uniform            = glGetUniformLocation(program_id, "view"); // Variável da matriz "view" em shader_vertex.glsl
+    GLint projection_uniform      = glGetUniformLocation(program_id, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
+    GLint render_as_black_uniform = glGetUniformLocation(program_id, "render_as_black"); // Variável booleana em shader_vertex.glsl
+
     // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
 
@@ -337,25 +360,61 @@ int main(int argc, char* argv[])
         // os shaders de vértice e fragmentos).
         glUseProgram(program_id);
 
-        // Computamos a posição da câmera utilizando coordenadas esféricas.  As
-        // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
-        // controladas pelo mouse do usuário. Veja as funções CursorPosCallback()
-        // e ScrollCallback().
-        float r = g_CameraDistance;
-        float y = r*sin(g_CameraPhi);
-        float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
-        float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
+        float r, y, z, x, x_la, y_la, z_la;
+
+        glm::vec4 cameraPosition_c;
+        glm::vec4 cameraLookAt_l;
+        glm::vec4 cameraViewVector;
+        glm::vec4 cameraUpVector;
+        glm::vec4 cameraPosition_c_x;
+        glm::vec4 cameraLookAt_l_x;
+        glm::vec4 cameraUpVector_x;
+
+
+        if(g_lookAt) {
+            x_la = 0;
+            y_la = 0;
+            z_la = 0;
+            r = g_CameraDistance;
+            y = r*sin(g_CameraPhi) + y_la;
+            z = r*cos(g_CameraPhi) * cos(g_CameraTheta);
+            x = r*cos(g_CameraPhi) * sin(g_CameraTheta) + x_la;
+
+            cameraPosition_c_x = glm::vec4(x,y,z,1.0f); // ponto "c" definido como sendo o centro da câmera.
+            cameraLookAt_l_x = glm::vec4(x_la, y_la,z_la, 1.0f); // ponto "l" definido como o local onde a câmera (look-at) irá sempre olhar.
+            cameraUpVector_x = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // vetor "up" sendo colocado fixamente sempre olhando para o "céu" (eixo y global).
+
+        }
+        else {
+
+            if(g_KeyPressedW){
+            cameraPosition_c_x = cameraPosition_c_g;
+            }
+            if(g_KeyPressedS){
+            cameraPosition_c_x = cameraPosition_c_g;
+            }
+            if(g_KeyPressedD){
+            cameraPosition_c_x = cameraPosition_c_g;
+            }
+            if(g_KeyPressedA){
+            cameraPosition_c_x = cameraPosition_c_g;
+            }
+
+            cameraPosition_c_x = cameraPosition_c_g;
+            cameraLookAt_l_x = cameraLookAt_l_g;
+            cameraUpVector_x = cameraUpVector_g;
+        }
 
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f); // Ponto "c", centro da câmera
-        glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
-        glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
-        glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+        cameraPosition_c  = cameraPosition_c_x; // Ponto "c", centro da câmera
+        cameraLookAt_l    = cameraLookAt_l_x; // Ponto "l", para onde a câmera (look-at) estará sempre olhando
+        cameraViewVector  = cameraLookAt_l - cameraPosition_c; // Vetor "view", sentido para onde a câmera está virada
+        cameraUpVector    = cameraUpVector_x; // Vetor "up" fixado para apontar para o "céu" (eito Y global)
 
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
         // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
+        glm::mat4 view = Matrix_Camera_View(cameraPosition_c, cameraViewVector, cameraUpVector);
 
         // Agora computamos a matriz de Projeção.
         glm::mat4 projection;
@@ -1227,6 +1286,82 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         LoadShadersFromFiles();
         fprintf(stdout,"Shaders recarregados!\n");
         fflush(stdout);
+    }
+
+    //Tecla F alterna entre os tipos de câmera (look-at previamente implementada no código original e free-cam implementada através das modificações nesse arquivo main).
+    if(key == GLFW_KEY_F && action == GLFW_PRESS) {
+
+        g_lookAt = !g_lookAt;
+        g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
+        g_CameraPhi = 0.0f; // Ângulo em relação ao eixo Y
+        g_CameraDistance = -g_CameraDistance; // Distância da câmera para a origem
+    }
+
+    //movimentação em primeira pessoa para a frente.
+    if(key == GLFW_KEY_W && !g_lookAt) {
+
+        if(action == GLFW_PRESS){
+            g_KeyPressedW = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            g_KeyPressedW = false;
+        }
+
+        cameraPosition_c_g += 0.3f * cameraViewVector_g;
+        cameraUpVector_g = glm::vec4(cameraPosition_c_g[0], cameraPosition_c_g[1] + 1.0f, cameraPosition_c_g[2], cameraPosition_c_g[3]) - cameraPosition_c_g;
+        cameraLookAt_l_g += 0.3f * cameraViewVector_g;
+        cameraViewVector_g = (cameraLookAt_l_g - cameraPosition_c_g) / norm(cameraLookAt_l_g - cameraPosition_c_g);
+
+    }
+
+    //movimentação em primeira pessoa para a direita.
+    if(key == GLFW_KEY_D && !g_lookAt) {
+
+        if(action == GLFW_PRESS){
+            g_KeyPressedD = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            g_KeyPressedD = false;
+        }
+
+        cameraOrtoVector_g = crossproduct(cameraUpVector_g, -cameraViewVector_g);
+        cameraPosition_c_g += 0.3f * cameraOrtoVector_g;
+        cameraUpVector_g = glm::vec4(cameraPosition_c_g[0], cameraPosition_c_g[1] + 1.0f, cameraPosition_c_g[2], cameraPosition_c_g[3]) - cameraPosition_c_g;
+        cameraLookAt_l_g += 0.3f * cameraOrtoVector_g;
+        cameraViewVector_g = (cameraLookAt_l_g - cameraPosition_c_g) / norm(cameraLookAt_l_g - cameraPosition_c_g);
+    }
+
+    //movimentação em primeira pessoa para trás.
+    if(key == GLFW_KEY_S && !g_lookAt) {
+
+        if(action == GLFW_PRESS){
+            g_KeyPressedS = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            g_KeyPressedS = false;
+        }
+
+        cameraPosition_c_g -= 0.3f * cameraViewVector_g;
+        cameraUpVector_g = glm::vec4(cameraPosition_c_g[0], cameraPosition_c_g[1] + 1.0f, cameraPosition_c_g[2], cameraPosition_c_g[3]) - cameraPosition_c_g;
+        cameraLookAt_l_g -= 0.3f * cameraViewVector_g;
+        cameraViewVector_g = (cameraLookAt_l_g - cameraPosition_c_g) / norm(cameraLookAt_l_g - cameraPosition_c_g);
+    }
+
+    //movimentação em primeira pessoa para a esquerda.
+    if(key == GLFW_KEY_A && !g_lookAt) {
+
+        if(action == GLFW_PRESS){
+            g_KeyPressedA = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            g_KeyPressedA = false;
+        }
+
+        cameraOrtoVector_g = crossproduct(cameraUpVector_g, -cameraViewVector_g);
+        cameraPosition_c_g -= 0.3f * cameraOrtoVector_g;
+        cameraUpVector_g = glm::vec4(cameraPosition_c_g[0], cameraPosition_c_g[1] + 1.0f, cameraPosition_c_g[2], cameraPosition_c_g[3]) - cameraPosition_c_g;
+        cameraLookAt_l_g -= 0.3f * cameraOrtoVector_g;
+        cameraViewVector_g = (cameraLookAt_l_g - cameraPosition_c_g) / norm(cameraLookAt_l_g - cameraPosition_c_g);
     }
 }
 
