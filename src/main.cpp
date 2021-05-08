@@ -289,7 +289,7 @@ int main(int argc, char* argv[])
     // ComputeNormals(&campfireModel);
     // BuildTrianglesAndAddToVirtualScene(&campfireModel);
 
-     ObjModel spiderModel("../../spider.obj");
+     ObjModel spiderModel("../../data/spider.obj");
      ComputeNormals(&spiderModel);
      BuildTrianglesAndAddToVirtualScene(&spiderModel);
 
@@ -428,7 +428,7 @@ int main(int argc, char* argv[])
         // glUniform1i(object_id_uniform, CAMPFIRE);
         // DrawVirtualObject("campfire");
 
-         //Desenhamos o plano do chão
+        // Desenhamos o plano do chão
          model = Matrix_Translate(6.0f,0.0f,0.0f);
          glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
          glUniform1i(object_id_uniform, SPIDER);
