@@ -48,6 +48,8 @@
 #include "utils.h"
 #include "matrices.h"
 
+#define M_PI 3.14159265358979323846
+
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
 struct ObjModel
@@ -277,6 +279,9 @@ int main(int argc, char *argv[])
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/tc-earth_daymap_surface.jpg");      // TextureImage0
     LoadTextureImage("../../data/tc-earth_nightmap_citylights.gif"); // TextureImage1
+    LoadTextureImage("../../data/wall.jpg"); // WallTexture
+    LoadTextureImage("../../data/floor.jpg"); // FloorTexture
+
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -291,9 +296,9 @@ int main(int argc, char *argv[])
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
 
-    // ObjModel campfireModel("../../Campfire.obj");
-    // ComputeNormals(&campfireModel);
-    // BuildTrianglesAndAddToVirtualScene(&campfireModel);
+    ObjModel wall("../../data/wall.obj");
+    ComputeNormals(&wall);
+    BuildTrianglesAndAddToVirtualScene(&wall);
 
     ObjModel spiderModel("../../data/spider.obj");
     ComputeNormals(&spiderModel);
@@ -417,7 +422,7 @@ int main(int argc, char *argv[])
             // Note que, no sistema de coordenadas da câmera, os planos near e far
             // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
             float nearplane = -0.1f; // Posição do "near plane"
-            float farplane = -10.0f; // Posição do "far plane"
+            float farplane = -100000.0f; // Posição do "far plane"
 
             if (g_UsePerspectiveProjection)
             {
@@ -450,39 +455,54 @@ int main(int argc, char *argv[])
 
 #define SPHERE 0
 #define BUNNY 1
-#define PLANE 2
-#define CAMPFIRE 3
-#define SPIDER 3
+#define WALL1 2
+#define WALL2 3
+#define WALL3 4
+#define WALL4 5
+#define FLOOR 6
 
-            // Desenhamos o modelo da esfera
-            model = Matrix_Translate(-1.0f, 0.0f, 0.0f) * Matrix_Rotate_Z(0.6f) * Matrix_Rotate_X(0.2f) * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
-            glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-            glUniform1i(object_id_uniform, SPHERE);
-            DrawVirtualObject("sphere");
+        // Desenhamos o modelo da esfera
+        model = Matrix_Translate(-1.0f, 0.0f, 0.0f) * Matrix_Rotate_Z(0.6f) * Matrix_Rotate_X(0.2f) * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
+        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(object_id_uniform, SPHERE);
+        DrawVirtualObject("sphere");
+        // Desenhamos o modelo do coelho
+        model = Matrix_Translate(1.0f, 0.0f, 0.0f) * Matrix_Rotate_X(g_AngleX + (float)glfwGetTime() * 0.1f);
+        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BUNNY);
+        DrawVirtualObject("Suzanne");
 
-            // Desenhamos o modelo do coelho
-            model = Matrix_Translate(1.0f, 0.0f, 0.0f) * Matrix_Rotate_X(g_AngleX + (float)glfwGetTime() * 0.1f);
-            glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-            glUniform1i(object_id_uniform, BUNNY);
-            DrawVirtualObject("Suzanne");
+        // desenhar parede 1
+        model = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL1);
+        DrawVirtualObject("wall");
 
-            // Desenhamos o plano do chão
-            model = Matrix_Translate(0.0f, -1.1f, 0.0f);
-            glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-            glUniform1i(object_id_uniform, PLANE);
-            DrawVirtualObject("plane");
+        // desenhar parede 2
+        model = Matrix_Translate(-2.5f, 1.3f, 0.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL2);
+        DrawVirtualObject("wall");
 
-            // Desenhamos o plano do chão
-            // model = Matrix_Translate(4.0f,0.0f,0.0f);
-            // glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-            // glUniform1i(object_id_uniform, CAMPFIRE);
-            // DrawVirtualObject("campfire");
+        // desenhar parede 3
+        model = Matrix_Translate(0.0f, 1.3f, 2.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.5f, 2.5f, 1.3f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL3);
+        DrawVirtualObject("wall");
 
-            // Desenhamos o plano do chão
-            model = Matrix_Translate(0.0f, 0.0f, 8.0f);
-            glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-            glUniform1i(object_id_uniform, SPIDER);
-            DrawVirtualObject("spider");
+        // desenhar parede 4
+        model = Matrix_Translate(0.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL4);
+        DrawVirtualObject("wall");
+
+                // desenhar chao
+        model = Matrix_Translate(0.0f, 0.0f, 0.0f)
+              * Matrix_Scale(2.5f, 1.0f, 2.5f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, FLOOR);
+        DrawVirtualObject("plane");
+
 
             // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
             // passamos por todos os sistemas de coordenadas armazenados nas
@@ -655,7 +675,9 @@ int main(int argc, char *argv[])
         glUseProgram(program_id);
         glUniform1i(glGetUniformLocation(program_id, "TextureImage0"), 0);
         glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 1);
-        glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 2);
+        glUniform1i(glGetUniformLocation(program_id, "WallTexture"), 2);
+        glUniform1i(glGetUniformLocation(program_id, "FloorTexture"), 3);
+
         glUseProgram(0);
     }
 

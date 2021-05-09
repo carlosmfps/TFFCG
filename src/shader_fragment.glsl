@@ -21,7 +21,12 @@ uniform mat4 projection;
 // Identificador que define qual objeto está sendo desenhado no momento
 #define SPHERE 0
 #define BUNNY  1
-#define PLANE  2
+#define WALL1 2
+#define WALL2 3
+#define WALL3 4
+#define WALL4 5
+#define FLOOR 6
+
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -31,7 +36,8 @@ uniform vec4 bbox_max;
 // Variáveis para acesso das imagens de textura
 uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
-uniform sampler2D TextureImage2;
+uniform sampler2D WallTexture;
+uniform sampler2D FloorTexture;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec3 color;
@@ -53,6 +59,11 @@ void main()
     // através da interpolação, feita pelo rasterizador, da posição de cada
     // vértice.
     vec4 p = position_world;
+    vec4 lightPosition = vec4(0.0f, 2.5f, 0.0f, 1.0f);
+    vec4 lightPosition2 = vec4(10.0f, -0.8f, 0.0f, 1.0f);
+    vec4 lightDirection = lightPosition - p;
+    vec4 lightDirection2 = normalize(lightPosition2 - p);
+    lightDirection = normalize(lightDirection);
 
     // Normal do fragmento atual, interpolada pelo rasterizador a partir das
     // normais de cada vértice.
@@ -64,9 +75,21 @@ void main()
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
 
+    float q; // Expoente especular para o modelo de iluminação de Blinn-Phong
+    
     // Coordenadas de textura U e V
     float U = 0.0;
     float V = 0.0;
+
+    // Parâmetros que definem as propriedades espectrais da superfície
+    vec3 Kd; // Refletância difusa
+    vec3 Ks; // Refletância especular
+    vec3 Ka; // Refletância ambiente
+
+    vec3 I = vec3(0.9,0.9,0.9); //espectro da fonte de iluminacao
+    vec3 Ia = vec3(0.25,0.25,0.3); // espectro da luz ambiente
+
+    float lambert = max(0,dot(n,l));
 
     if ( object_id == SPHERE )
     {
@@ -116,25 +139,56 @@ void main()
         U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
         V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
     }
-    else if ( object_id == PLANE )
+    else if (object_id == FLOOR)
     {
-        // Coordenadas de textura do plano, obtidas do arquivo OBJ.
+        float minx = bbox_min.x;
+        float maxx = bbox_max.x;
+
+        float miny = bbox_min.y;
+        float maxy = bbox_max.y;
+
+        float minz = bbox_min.z;
+        float maxz = bbox_max.z;
+
+        U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
+        V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
+
+        vec3 kd0 = texture(FloorTexture, vec2(U, V)).rgb;
+        float lambert = max(0, dot(n, lightDirection));
+
+        color = kd0 * (lambert + 0.01);
+    }
+    else if (object_id == WALL1 || object_id == WALL2 || object_id == WALL3 || object_id == WALL4)
+    {
+        float minx = bbox_min.x;
+        float maxx = bbox_max.x;
+
+        float miny = bbox_min.y;
+        float maxy = bbox_max.y;
+
+        float minz = bbox_min.z;
+        float maxz = bbox_max.z;
+
+        U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
+        V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
+
         U = texcoords.x;
         V = texcoords.y;
+        vec3 kd0 = texture(WallTexture, vec2(U, V)).rgb;
+        float lambert = max(0, dot(n, lightDirection));
+
+        color = kd0 * (lambert + 0.01);
     }
 
-    // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
-    vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
-    //adicionando segunda textura
-    vec3 Kd1 = texture(TextureImage1, vec2(U,V)).rgb;
+    //// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+    //vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
+    ////adicionando segunda textura
+    //vec3 Kd1 = texture(TextureImage1, vec2(U,V)).rgb;
 
-    // Equação de Iluminação
-    float lambert = max(0,dot(n,l));
-
-    color = Kd0 * (lambert + 0.01);
-    //transição
-    if(object_id == SPHERE)
-        color += Kd1 / ((lambert+0.02) * 50);
+    //color = Kd0 * (lambert + 0.01);
+    ////transição
+    //if(object_id == SPHERE)
+    //    color += Kd1 / ((lambert+0.02) * 50);
 
     // Cor final com correção gamma, considerando monitor sRGB.
     // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
