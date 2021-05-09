@@ -2536,7 +2536,7 @@
 	<fstream>
 	<sstream>
 
-1620515924 source:d:\documentos\2020-2\fcg\tffcg\src\main.cpp
+1620530790 source:d:\documentos\2020-2\fcg\tffcg\src\main.cpp
 	<cmath>
 	<cstdio>
 	<cstdlib>
@@ -2824,4 +2824,6 @@
 	<glm/mat4x4.hpp>
 	<glm/vec4.hpp>
 	<glm/gtc/matrix_transform.hpp>
+
+1620519893 d:\documentos\2020-2\fcg\tffcg\src\elements.cpp
 
