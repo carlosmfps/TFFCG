@@ -76,7 +76,7 @@ void main()
     vec4 v = normalize(camera_position - p);
 
     float q; // Expoente especular para o modelo de iluminação de Blinn-Phong
-    
+
     // Coordenadas de textura U e V
     float U = 0.0;
     float V = 0.0;
@@ -115,6 +115,16 @@ void main()
 
         U = (theta + M_PI)/(2*M_PI);
         V = (phi + M_PI_2)/M_PI;
+
+    //Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+    vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
+    //adicionando segunda textura
+    vec3 Kd1 = texture(TextureImage1, vec2(U,V)).rgb;
+
+    color = Kd0 * (lambert + 0.01);
+    ////transição
+    if(object_id == SPHERE)
+        color += Kd1 / ((lambert+0.02) * 50);
     }
     else if ( object_id == BUNNY )
     {
@@ -138,6 +148,16 @@ void main()
 
         U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
         V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
+
+    //Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+    vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
+    //adicionando segunda textura
+    vec3 Kd1 = texture(TextureImage1, vec2(U,V)).rgb;
+
+    color = Kd0 * (lambert + 0.01);
+    ////transição
+    if(object_id == SPHERE)
+        color += Kd1 / ((lambert+0.02) * 50);
     }
     else if (object_id == FLOOR)
     {
@@ -153,42 +173,21 @@ void main()
         U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
         V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
 
-        vec3 kd0 = texture(FloorTexture, vec2(U, V)).rgb;
+        vec3 kd0 = texture(TextureImage1, vec2(U, V)).rgb;
         float lambert = max(0, dot(n, lightDirection));
 
-        color = kd0 * (lambert + 0.01);
+        color = kd0 + (lambert *0.01);
     }
     else if (object_id == WALL1 || object_id == WALL2 || object_id == WALL3 || object_id == WALL4)
     {
-        float minx = bbox_min.x;
-        float maxx = bbox_max.x;
-
-        float miny = bbox_min.y;
-        float maxy = bbox_max.y;
-
-        float minz = bbox_min.z;
-        float maxz = bbox_max.z;
-
-        U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
-        V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
-
         U = texcoords.x;
         V = texcoords.y;
         vec3 kd0 = texture(WallTexture, vec2(U, V)).rgb;
-        float lambert = max(0, dot(n, lightDirection));
+        //float lambert = max(0, dot(n, lightDirection));
 
-        color = kd0 * (lambert + 0.01);
+        color = kd0 + (lambert *0.01);
     }
 
-    //// Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
-    //vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
-    ////adicionando segunda textura
-    //vec3 Kd1 = texture(TextureImage1, vec2(U,V)).rgb;
-
-    //color = Kd0 * (lambert + 0.01);
-    ////transição
-    //if(object_id == SPHERE)
-    //    color += Kd1 / ((lambert+0.02) * 50);
 
     // Cor final com correção gamma, considerando monitor sRGB.
     // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas

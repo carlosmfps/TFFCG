@@ -304,6 +304,10 @@ int main(int argc, char *argv[])
     ComputeNormals(&spiderModel);
     BuildTrianglesAndAddToVirtualScene(&spiderModel);
 
+    ObjModel doorModel("../../data/door.obj");
+    ComputeNormals(&doorModel);
+    BuildTrianglesAndAddToVirtualScene(&doorModel);
+
     if (argc > 1)
     {
         ObjModel model(argv[1]);
@@ -460,6 +464,19 @@ int main(int argc, char *argv[])
 #define WALL3 4
 #define WALL4 5
 #define FLOOR 6
+#define WALL5 7
+#define WALL6 8
+#define WALL7 9
+#define WALL8 10
+#define FLOOR2 11
+#define WALL9 12
+#define WALL10 13
+#define WALL11 14
+#define WALL12 15
+#define FLOOR3 16
+#define DOOR1 17
+#define DOOR2 18
+
 
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(-1.0f, 0.0f, 0.0f) * Matrix_Rotate_Z(0.6f) * Matrix_Rotate_X(0.2f) * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
@@ -491,18 +508,62 @@ int main(int argc, char *argv[])
         DrawVirtualObject("wall");
 
         // desenhar parede 4
-        model = Matrix_Translate(0.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        model = Matrix_Translate(-1.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL4);
         DrawVirtualObject("wall");
 
-                // desenhar chao
+        // desenhar chao
         model = Matrix_Translate(0.0f, 0.0f, 0.0f)
               * Matrix_Scale(2.5f, 1.0f, 2.5f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, FLOOR);
         DrawVirtualObject("plane");
 
+        // desenhar porta1
+        model = Matrix_Translate(1.85f, 1.0f, -2.5f) * Matrix_Rotate_Y(-M_PI/2)
+              * Matrix_Scale(0.2f, 0.2f, 0.15f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, DOOR1);
+        DrawVirtualObject("door");
+
+        // desenhar parede 5
+        model = Matrix_Translate(2.5f, 1.3f, -5.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL5);
+        DrawVirtualObject("wall");
+
+        // desenhar parede 6
+        model = Matrix_Translate(-2.5f, 1.3f, -5.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL6);
+        DrawVirtualObject("wall");
+
+        // desenhar parede 7
+        model = Matrix_Translate(-1.0f, 1.3f, -2.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.0f, 2.5f, 1.3f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL7);
+        DrawVirtualObject("wall");
+
+        // desenhar parede 8
+        model = Matrix_Translate(-1.0f, 1.3f, -7.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 1.3f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL8);
+        DrawVirtualObject("wall");
+
+        // desenhar chao2
+        model = Matrix_Translate(0.0f, 0.0f, -5.0f)
+              * Matrix_Scale(2.5f, 1.0f, 2.5f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, FLOOR2);
+        DrawVirtualObject("plane");
+
+        // desenhar porta2
+        model = Matrix_Translate(1.85f, 1.0f, -7.5f) * Matrix_Rotate_Y(-M_PI/2)
+              * Matrix_Scale(0.2f, 0.2f, 0.15f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, DOOR2);
+        DrawVirtualObject("door");
 
             // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
             // passamos por todos os sistemas de coordenadas armazenados nas
