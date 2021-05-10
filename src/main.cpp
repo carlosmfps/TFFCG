@@ -156,9 +156,7 @@ float g_AngleZ = 0.0f;
 
 // "g_LeftMouseButtonPressed = true" se o usuário está com o botão esquerdo do mouse
 // pressionado no momento atual. Veja função MouseButtonCallback().
-bool g_LeftMouseButtonPressed = false;
-bool g_RightMouseButtonPressed = false;  // Análogo para botão direito do mouse
-bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mouse
+bool g_LeftMouseButtonPressed = true;
 
 // Variáveis que definem a câmera em coordenadas esféricas, controladas pelo
 // usuário através do mouse (veja função CursorPosCallback()). A posição
@@ -166,10 +164,10 @@ bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mous
 // renderização.
 float g_CameraTheta = 0.0f;    // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;      // Ângulo em relação ao eixo Y
-float g_CameraDistance = 25.0f; // Distância da câmera para a origem
+float g_CameraDistance = 50.0f; // Distância da câmera para a origem
 
-glm::vec4 cameraPosition_c_g = glm::vec4(0.0f, 0.0f, 2.5f, 1.0f);
-glm::vec4 cameraLookAt_l_g = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+glm::vec4 cameraPosition_c_g = glm::vec4(2.0f, 1.0f, 0.0f, 1.0f);
+glm::vec4 cameraLookAt_l_g = glm::vec4(4.0f, 0.0f, 1.0f, 1.0f);
 glm::vec4 cameraViewVector_g = cameraLookAt_l_g - cameraPosition_c_g;
 glm::vec4 cameraUpVector_g = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 glm::vec4 cameraOrtoVector_g = cameraUpVector_g * (-cameraViewVector_g);
@@ -271,6 +269,8 @@ int main(int argc, char *argv[])
 
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     // Carregamos os shaders de vértices e de fragmentos que serão utilizados
     // para renderização. Veja slides 176-196 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
     //
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
         // os shaders de vértice e fragmentos).
         glUseProgram(program_id);
 
-        float r, y, z, x, x_la, y_la, z_la;
+        float r, y, z, x;
 
         glm::vec4 cameraPosition_c;
         glm::vec4 cameraLookAt_l;
@@ -368,16 +368,8 @@ int main(int argc, char *argv[])
 
         if (g_lookAt)
         {
-            x_la = 0;
-            y_la = 0;
-            z_la = 0;
-            r = g_CameraDistance;
-            y = r * sin(g_CameraPhi) + y_la;
-            z = r * cos(g_CameraPhi) * cos(g_CameraTheta);
-            x = r * cos(g_CameraPhi) * sin(g_CameraTheta) + x_la;
-
-            cameraPosition_c_x = glm::vec4(x, y, z, 1.0f);        // ponto "c" definido como sendo o centro da câmera.
-            cameraLookAt_l_x = glm::vec4(x_la, y_la, z_la, 1.0f); // ponto "l" definido como o local onde a câmera (look-at) irá sempre olhar.
+            cameraPosition_c_x = glm::vec4(2.0, 3.0, 0.0, 1.0f);  // camera da parede apontada fixamente. 
+            cameraLookAt_l_x = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); 
             cameraUpVector_x = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f); // vetor "up" sendo colocado fixamente sempre olhando para o "céu" (eixo y global).
         }
         else
@@ -1097,45 +1089,7 @@ int main(int argc, char *argv[])
             // g_LeftMouseButtonPressed como true, para saber que o usuário está
             // com o botão esquerdo pressionado.
             glfwGetCursorPos(window, &g_LastCursorPosX, &g_LastCursorPosY);
-            g_LeftMouseButtonPressed = true;
-        }
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-        {
-            // Quando o usuário soltar o botão esquerdo do mouse, atualizamos a
-            // variável abaixo para false.
-            g_LeftMouseButtonPressed = false;
-        }
-        if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-        {
-            // Se o usuário pressionou o botão esquerdo do mouse, guardamos a
-            // posição atual do cursor nas variáveis g_LastCursorPosX e
-            // g_LastCursorPosY.  Também, setamos a variável
-            // g_RightMouseButtonPressed como true, para saber que o usuário está
-            // com o botão esquerdo pressionado.
-            glfwGetCursorPos(window, &g_LastCursorPosX, &g_LastCursorPosY);
-            g_RightMouseButtonPressed = true;
-        }
-        if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-        {
-            // Quando o usuário soltar o botão esquerdo do mouse, atualizamos a
-            // variável abaixo para false.
-            g_RightMouseButtonPressed = false;
-        }
-        if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
-        {
-            // Se o usuário pressionou o botão esquerdo do mouse, guardamos a
-            // posição atual do cursor nas variáveis g_LastCursorPosX e
-            // g_LastCursorPosY.  Também, setamos a variável
-            // g_MiddleMouseButtonPressed como true, para saber que o usuário está
-            // com o botão esquerdo pressionado.
-            glfwGetCursorPos(window, &g_LastCursorPosX, &g_LastCursorPosY);
-            g_MiddleMouseButtonPressed = true;
-        }
-        if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
-        {
-            // Quando o usuário soltar o botão esquerdo do mouse, atualizamos a
-            // variável abaixo para false.
-            g_MiddleMouseButtonPressed = false;
+            g_LeftMouseButtonPressed = !g_LeftMouseButtonPressed;
         }
     }
 
@@ -1180,7 +1134,7 @@ int main(int argc, char *argv[])
         float z = r * cos(g_CameraPhi) * cos(g_CameraTheta);
         float x = r * cos(g_CameraPhi) * sin(g_CameraTheta);
 
-        cameraLookAt_l_g = glm::vec4(x, y, z, 1.0f);
+        cameraLookAt_l_g = glm::vec4(x, -y, z, 1.0f);
     }
 
     // Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
@@ -1277,11 +1231,7 @@ int main(int argc, char *argv[])
         //Tecla F alterna entre os tipos de câmera (look-at previamente implementada no código original e free-cam implementada através das modificações nesse arquivo main).
         if (key == GLFW_KEY_F && action == GLFW_PRESS)
         {
-
             g_lookAt = !g_lookAt;
-            g_CameraTheta = 0.0f;                 // Ângulo no plano ZX em relação ao eixo Z
-            g_CameraPhi = 0.0f;                   // Ângulo em relação ao eixo Y
-            g_CameraDistance = -g_CameraDistance; // Distância da câmera para a origem
         }
 
         //movimentação em primeira pessoa para a frente.
