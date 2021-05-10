@@ -25,7 +25,17 @@ uniform mat4 projection;
 #define WALL2 3
 #define WALL3 4
 #define WALL4 5
-#define FLOOR 6
+#define FLOOR1 6
+#define WALL5 7
+#define WALL6 8
+#define WALL7 9
+#define WALL8 10
+#define FLOOR2 11
+#define WALL9 12
+#define WALL10 13
+#define WALL11 14
+#define WALL12 15
+#define FLOOR3 16
 
 uniform int object_id;
 
@@ -159,7 +169,7 @@ void main()
     if(object_id == SPHERE)
         color += Kd1 / ((lambert+0.02) * 50);
     }
-    else if (object_id == FLOOR)
+    else if (object_id == FLOOR1 || object_id == FLOOR2 || object_id == FLOOR3)
     {
         float minx = bbox_min.x;
         float maxx = bbox_max.x;
@@ -178,7 +188,7 @@ void main()
 
         color = kd0 + (lambert *0.01);
     }
-    else if (object_id == WALL1 || object_id == WALL2 || object_id == WALL3 || object_id == WALL4)
+    else if (object_id == WALL1 || object_id == WALL2 || object_id == WALL3 || object_id == WALL4 ||object_id == WALL5 || object_id == WALL6 || object_id == WALL7 || object_id == WALL8 || object_id == WALL9 || object_id == WALL10 || object_id == WALL11 || object_id == WALL12)
     {
         U = texcoords.x;
         V = texcoords.y;
