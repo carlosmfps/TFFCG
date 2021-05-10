@@ -49,6 +49,8 @@
 #include "matrices.h"
 
 #define M_PI 3.14159265358979323846
+int door1open = 0;
+int door2open = 0;
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -308,6 +310,10 @@ int main(int argc, char *argv[])
     ComputeNormals(&doorModel);
     BuildTrianglesAndAddToVirtualScene(&doorModel);
 
+    ObjModel leverModel("../../data/lever.obj");
+    ComputeNormals(&leverModel);
+    BuildTrianglesAndAddToVirtualScene(&leverModel);
+
     if (argc > 1)
     {
         ObjModel model(argv[1]);
@@ -468,6 +474,8 @@ int main(int argc, char *argv[])
 #define FLOOR3 16
 #define DOOR1 17
 #define DOOR2 18
+#define MAP 19
+#define LEVER1 20
 
 
         // Desenhamos o modelo da esfera
@@ -485,25 +493,25 @@ int main(int argc, char *argv[])
         model = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL1);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar parede 2
         model = Matrix_Translate(-2.5f, 1.3f, 0.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL2);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar parede 3
         model = Matrix_Translate(0.0f, 1.3f, 2.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.5f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL3);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar parede 4
         model = Matrix_Translate(-1.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL4);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar chao
         model = Matrix_Translate(0.0f, 0.0f, 0.0f)
@@ -517,31 +525,31 @@ int main(int argc, char *argv[])
               * Matrix_Scale(0.2f, 0.2f, 0.15f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, DOOR1);
-        DrawVirtualObject("door");
+        if(!door1open){DrawVirtualObject("door");}
 
         // desenhar parede 5
         model = Matrix_Translate(2.5f, 1.3f, -5.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL5);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar parede 6
         model = Matrix_Translate(-2.5f, 1.3f, -5.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL6);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar parede 7
         model = Matrix_Translate(-1.0f, 1.3f, -2.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.0f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL7);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar parede 8
-        model = Matrix_Translate(-1.0f, 1.3f, -7.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 1.3f);
+        model = Matrix_Translate(1.35f, 1.3f, -7.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL8);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar chao2
         model = Matrix_Translate(0.0f, 0.0f, -5.0f)
@@ -551,35 +559,35 @@ int main(int argc, char *argv[])
         DrawVirtualObject("plane");
 
         // desenhar porta2
-        model = Matrix_Translate(1.85f, 1.0f, -7.5f) * Matrix_Rotate_Y(-M_PI/2)
+        model = Matrix_Translate(-1.5f, 1.0f, -7.5f) * Matrix_Rotate_Y(-M_PI/2)
               * Matrix_Scale(0.2f, 0.2f, 0.15f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, DOOR2);
-        DrawVirtualObject("door");
+        if(!door2open){DrawVirtualObject("door");}
 
         // desenhar parede 9
         model = Matrix_Translate(2.5f, 1.3f, -10.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL5);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar parede 10
         model = Matrix_Translate(-2.5f, 1.3f, -10.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL6);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar parede 11
         model = Matrix_Translate(-1.0f, 1.3f, -7.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.0f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL7);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar parede 12
         model = Matrix_Translate(0.0f, 1.3f, -12.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.5f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL8);
-        DrawVirtualObject("wall");
+        DrawVirtualObject("plane");
 
         // desenhar chao3
         model = Matrix_Translate(0.0f, 0.0f, -10.0f)
@@ -587,6 +595,23 @@ int main(int argc, char *argv[])
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, FLOOR2);
         DrawVirtualObject("plane");
+
+        // desenhar parede 2
+        model = Matrix_Translate(-2.4f, 1.3f, 0.0f)
+            * Matrix_Rotate_X(-M_PI/2)
+            * Matrix_Rotate_Z(-M_PI/2)
+            * Matrix_Rotate_Y(M_PI)
+            * Matrix_Scale(2.2f, 1.0f, 1.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, MAP);
+        DrawVirtualObject("plane");
+
+                // desenhar parede 2
+        model = Matrix_Translate(-2.4f, 1.3f, 0.0f)
+            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, LEVER1);
+        DrawVirtualObject("lever");
 
             // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
             // passamos por todos os sistemas de coordenadas armazenados nas
@@ -1324,6 +1349,17 @@ int main(int argc, char *argv[])
         if (key == GLFW_KEY_F && action == GLFW_PRESS)
         {
             g_lookAt = !g_lookAt;
+
+        }
+
+        if (key == GLFW_KEY_1 && action == GLFW_PRESS)
+        {
+            door1open = !door1open;
+        }
+
+        if (key == GLFW_KEY_2 && action == GLFW_PRESS)
+        {
+           door2open = !door2open;
         }
 
         //movimentação em primeira pessoa para a frente.

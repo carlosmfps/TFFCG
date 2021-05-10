@@ -36,6 +36,10 @@ uniform mat4 projection;
 #define WALL11 14
 #define WALL12 15
 #define FLOOR3 16
+#define DOOR1 17
+#define DOOR2 18
+#define MAP 19
+#define LEVER1 20
 
 uniform int object_id;
 
@@ -136,7 +140,7 @@ void main()
     if(object_id == SPHERE)
         color += Kd1 / ((lambert+0.02) * 50);
     }
-    else if ( object_id == BUNNY )
+    else if ( object_id == BUNNY || object_id == LEVER1)
     {
         // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
         // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
@@ -171,19 +175,10 @@ void main()
     }
     else if (object_id == FLOOR1 || object_id == FLOOR2 || object_id == FLOOR3)
     {
-        float minx = bbox_min.x;
-        float maxx = bbox_max.x;
+        U = texcoords.x;
+        V = texcoords.y;
 
-        float miny = bbox_min.y;
-        float maxy = bbox_max.y;
-
-        float minz = bbox_min.z;
-        float maxz = bbox_max.z;
-
-        U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
-        V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
-
-        vec3 kd0 = texture(TextureImage1, vec2(U, V)).rgb;
+        vec3 kd0 = texture(FloorTexture, vec2(U, V)).rgb;
         float lambert = max(0, dot(n, lightDirection));
 
         color = kd0 + (lambert *0.01);
@@ -192,8 +187,19 @@ void main()
     {
         U = texcoords.x;
         V = texcoords.y;
+
         vec3 kd0 = texture(WallTexture, vec2(U, V)).rgb;
-        //float lambert = max(0, dot(n, lightDirection));
+        float lambert = max(0, dot(n, lightDirection));
+
+        color = kd0 + (lambert *0.01);
+    }
+        else if (object_id == MAP)
+    {
+        U = texcoords.x;
+        V = texcoords.y;
+
+        vec3 kd0 = texture(TextureImage0, vec2(U, V)).rgb;
+        float lambert = max(0, dot(n, lightDirection));
 
         color = kd0 + (lambert *0.01);
     }
