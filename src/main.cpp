@@ -51,6 +51,13 @@
 #define M_PI 3.14159265358979323846
 int door1open = 0;
 int door2open = 0;
+int lever1act = 0;
+int lever2act = 0;
+int lever3act = 0;
+int lever4act = 0;
+int lever5act = 0;
+int lever6act = 0;
+int lever7act = 0;
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -476,7 +483,14 @@ int main(int argc, char *argv[])
 #define DOOR2 18
 #define MAP 19
 #define LEVER1 20
+#define LEVER2 21
+#define LEVER3 22
+#define LEVER4 23
+#define LEVER5 24
+#define LEVER6 25
+#define LEVER7 26
 
+        door1open = !lever1act && lever2act && !lever3act && lever4act && lever5act && !lever6act && !lever7act;
 
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(-1.0f, 0.0f, 0.0f) * Matrix_Rotate_Z(0.6f) * Matrix_Rotate_X(0.2f) * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
@@ -578,7 +592,7 @@ int main(int argc, char *argv[])
         DrawVirtualObject("plane");
 
         // desenhar parede 11
-        model = Matrix_Translate(-1.0f, 1.3f, -7.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.0f, 2.5f, 1.3f);
+        model = Matrix_Translate(1.35f, 1.3f, -7.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.0f, 2.5f, 1.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL7);
         DrawVirtualObject("plane");
@@ -606,12 +620,83 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, MAP);
         DrawVirtualObject("plane");
 
-                // desenhar parede 2
-        model = Matrix_Translate(-2.4f, 1.3f, 0.0f)
-            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        // desenhar lever1
+        model = Matrix_Translate(-2.4f, 1.9f, 1.3f)
+            * Matrix_Rotate_Z(-M_PI/2)
+            * Matrix_Scale(0.075f, 0.075f, 0.075f);
+            if(lever1act) {
+                model = model * Matrix_Rotate_Y(M_PI);
+            }
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, LEVER1);
         DrawVirtualObject("lever");
+
+        // desenhar lever2
+        model = Matrix_Translate(-2.4f, 1.0f, -1.70f)
+            * Matrix_Rotate_Z(-M_PI/2)
+            * Matrix_Scale(0.075f, 0.075f, 0.075f);
+            if(lever2act) {
+                model = model * Matrix_Rotate_Y(M_PI);
+            }
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, LEVER2);
+        DrawVirtualObject("lever");
+
+        // desenhar lever3
+        model = Matrix_Translate(-2.4f, 1.95f, -1.0f)
+            * Matrix_Rotate_Z(-M_PI/2)
+            * Matrix_Scale(0.075f, 0.075f, 0.075f);
+            if(lever3act) {
+                model = model * Matrix_Rotate_Y(M_PI);
+            }
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, LEVER3);
+        DrawVirtualObject("lever");
+
+        // desenhar lever4
+        model = Matrix_Translate(-2.4f, 1.5f, -0.95f)
+            * Matrix_Rotate_Z(-M_PI/2)
+            * Matrix_Scale(0.075f, 0.075f, 0.075f);
+            if(lever4act) {
+                model = model * Matrix_Rotate_Y(M_PI);
+            }
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, LEVER4);
+        DrawVirtualObject("lever");
+
+        // desenhar lever5
+        model = Matrix_Translate(-2.4f, 1.2f, 0.55f)
+            * Matrix_Rotate_Z(-M_PI/2)
+            * Matrix_Scale(0.075f, 0.075f, 0.075f);
+            if(lever5act) {
+                model = model * Matrix_Rotate_Y(M_PI);
+            }
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, LEVER5);
+        DrawVirtualObject("lever");
+
+        // desenhar 6
+        model = Matrix_Translate(-2.4f, 1.5f, -0.5f)
+            * Matrix_Rotate_Z(-M_PI/2)
+            * Matrix_Scale(0.075f, 0.075f, 0.075f);
+            if(lever6act) {
+                model = model * Matrix_Rotate_Y(M_PI);
+            }
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, LEVER6);
+        DrawVirtualObject("lever");
+
+        // desenhar lever7
+        model = Matrix_Translate(-2.4f, 1.8f, -0.2f)
+            * Matrix_Rotate_Z(-M_PI/2)
+            * Matrix_Scale(0.075f, 0.075f, 0.075f);
+            if(lever7act) {
+                model = model * Matrix_Rotate_Y(M_PI);
+            }
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, LEVER7);
+        DrawVirtualObject("lever");
+
 
             // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
             // passamos por todos os sistemas de coordenadas armazenados nas
@@ -1354,12 +1439,33 @@ int main(int argc, char *argv[])
 
         if (key == GLFW_KEY_1 && action == GLFW_PRESS)
         {
-            door1open = !door1open;
+            lever1act = !lever1act;
         }
 
         if (key == GLFW_KEY_2 && action == GLFW_PRESS)
         {
            door2open = !door2open;
+           lever2act = !lever2act;
+        }
+        if (key == GLFW_KEY_3 && action == GLFW_PRESS)
+        {
+           lever3act = !lever3act;
+        }
+        if (key == GLFW_KEY_4 && action == GLFW_PRESS)
+        {
+           lever4act = !lever4act;
+        }
+        if (key == GLFW_KEY_5 && action == GLFW_PRESS)
+        {
+           lever5act = !lever5act;
+        }
+        if (key == GLFW_KEY_6 && action == GLFW_PRESS)
+        {
+           lever6act = !lever6act;
+        }
+        if (key == GLFW_KEY_7 && action == GLFW_PRESS)
+        {
+           lever7act = !lever7act;
         }
 
         //movimentação em primeira pessoa para a frente.
