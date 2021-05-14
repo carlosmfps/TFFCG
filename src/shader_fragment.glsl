@@ -52,7 +52,7 @@ uniform mat4 projection;
 #define WOODZ2 30
 #define WOODZ3 31
 #define TIPBOARD1 32
-#define TIPBOARD2 32
+#define TIPBOARD2 33
 
 uniform int object_id;
 
@@ -183,7 +183,7 @@ void main()
 
         color = kd0 + (lambert *0.01);
     }
-        else if(object_id == TIPBOARD2) {
+    else if(object_id == TIPBOARD2) {
         U = texcoords.x;
         V = texcoords.y;
 

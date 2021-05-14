@@ -58,7 +58,10 @@ int lever4act = 0;
 int lever5act = 0;
 int lever6act = 0;
 int lever7act = 0;
-int woodenChairRotation = 1;
+int woodenChairRotation = 0;
+int woodenZ1Rotation = 3;
+int woodenZ2Rotation = 5;
+int woodenZ3Rotation = 4;
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -215,6 +218,10 @@ bool isDoor1Open() {
     return !lever1act && lever2act && !lever3act && lever4act && lever5act && !lever6act && !lever7act;
 }
 
+bool isDoor2Open() {
+    return woodenChairRotation % 4 == 1 && woodenZ1Rotation % 10 == 5 && woodenZ2Rotation % 10 == 0  && woodenZ3Rotation % 10 ==5;
+}
+
 int main(int argc, char *argv[])
 {
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
@@ -297,7 +304,7 @@ int main(int argc, char *argv[])
     LoadTextureImage("../../data/floor.jpg"); // FloorTexture
     LoadTextureImage("../../data/oak-wood.png"); // OakWoodTexture
     LoadTextureImage("../../data/tip1.png"); // tip1Texture
-    LoadTextureImage("../../data/tip1.png"); // tip2Texture
+    LoadTextureImage("../../data/tip2.png"); // tip2Texture
 
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
@@ -521,7 +528,9 @@ int main(int argc, char *argv[])
         if(isDoor1Open()) {
             door1open = true;
         }
-
+        if(isDoor2Open()){
+            door2open = true;
+        }
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(-1.0f, 0.0f, 0.0f) * Matrix_Rotate_Z(0.6f) * Matrix_Rotate_X(0.2f) * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
@@ -531,7 +540,7 @@ int main(int argc, char *argv[])
         model = Matrix_Translate(1.0f, 0.0f, 0.0f) * Matrix_Rotate_X(g_AngleX + (float)glfwGetTime() * 0.1f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(object_id_uniform, BUNNY);
-        DrawVirtualObject("Suzanne");
+        //DrawVirtualObject("Suzanne");
 
         // desenhar parede 1
         model = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
@@ -640,7 +649,7 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, FLOOR2);
         DrawVirtualObject("plane");
 
-        // desenhar parede 2
+        // desenhar map
         model = Matrix_Translate(-2.4f, 1.3f, 0.0f)
             * Matrix_Rotate_X(-M_PI/2)
             * Matrix_Rotate_Z(-M_PI/2)
@@ -753,36 +762,38 @@ int main(int argc, char *argv[])
         DrawVirtualObject("woodChair");
 
                 // desenhar WOODZ1
-        model = Matrix_Translate(7.0f, 1.8f, -0.2f)
-            * Matrix_Scale(1.0f, 1.0f, 1.0f);
-            if(lever7act) {
-                model = model * Matrix_Rotate_Y(M_PI);
-            }
+        model = Matrix_Translate(-2.4f, 1.8f, -5.2f)
+            * Matrix_Scale(1.0f, 1.0f, 1.0f)
+            * Matrix_Rotate_X( woodenZ1Rotation * M_PI/5);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WOODZ1);
         DrawVirtualObject("woodZ");
 
                         // desenhar WOODZ2
-        model = Matrix_Translate(8.0f, 1.8f, -0.2f)
-            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        model = Matrix_Translate(-2.4f, 1.5f, -5.4f)
+            * Matrix_Scale(1.0f, 1.0f, 1.0f)
+            * Matrix_Rotate_X( woodenZ2Rotation * M_PI/5);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WOODZ2);
         DrawVirtualObject("woodZ");
 
                         // desenhar WOODZ3
-        model = Matrix_Translate(9.0f, 1.8f, -0.2f)
-            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        model = Matrix_Translate(-2.4f, 1.8f, -5.6f)
+            * Matrix_Scale(1.0f, 1.0f, 1.0f)
+            * Matrix_Rotate_X( woodenZ3Rotation * M_PI/5);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WOODZ3);
         DrawVirtualObject("woodZ");
 
-                        // desenhar TIPBOARD
-        model = Matrix_Translate(10.0f, 1.8f, -0.2f)
-            * Matrix_Rotate_Z(-M_PI/2)
-            * Matrix_Scale(0.075f, 0.075f, 0.075f);
+                        // desenhar TIPBOARD2
+        model = Matrix_Translate(2.49f, 1.3f, -5.0f) 
+            * Matrix_Rotate_X(-M_PI/2) 
+            * Matrix_Rotate_Z(M_PI/2)
+            * Matrix_Rotate_Y(M_PI)
+            * Matrix_Scale(1.5f, 0.75f, 0.75f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, LEVER7);
-        //DrawVirtualObject("lever");
+        glUniform1i(object_id_uniform, TIPBOARD2);
+        DrawVirtualObject("plane");
 
 
             // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
@@ -1529,34 +1540,54 @@ int main(int argc, char *argv[])
 
         if (key == GLFW_KEY_1 && action == GLFW_PRESS)
         {
-            lever1act = !lever1act;
+            if(!door1open){
+                lever1act = !lever1act;
+            }
         }
 
         if (key == GLFW_KEY_2 && action == GLFW_PRESS)
         {
-           door2open = !door2open;
-           lever2act = !lever2act;
-           woodenChairRotation += 1;
+            if(!door1open){
+                lever2act = !lever2act;
+           }else if(!door2open) {
+                woodenChairRotation += 1;
+           }
         }
         if (key == GLFW_KEY_3 && action == GLFW_PRESS)
         {
-           lever3act = !lever3act;
+            if(!door1open){
+                lever3act = !lever3act;
+            } else if(!door2open){
+                woodenZ1Rotation += 1;
+            }
         }
         if (key == GLFW_KEY_4 && action == GLFW_PRESS)
         {
-           lever4act = !lever4act;
+            if(!door1open){
+                lever4act = !lever4act;
+            } else if(!door2open) {
+                woodenZ2Rotation += 1;
+            }
         }
         if (key == GLFW_KEY_5 && action == GLFW_PRESS)
         {
-           lever5act = !lever5act;
+            if(!door1open){
+                lever5act = !lever5act;
+            } else {
+                woodenZ3Rotation += 1;
+            }
         }
         if (key == GLFW_KEY_6 && action == GLFW_PRESS)
         {
-           lever6act = !lever6act;
+            if(!door1open){
+                lever6act = !lever6act;
+            }
         }
         if (key == GLFW_KEY_7 && action == GLFW_PRESS)
         {
-           lever7act = !lever7act;
+            if(!door1open){
+                lever7act = !lever7act;
+            }
         }
 
         //movimentação em primeira pessoa para a frente.
