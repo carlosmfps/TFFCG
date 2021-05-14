@@ -58,6 +58,7 @@ int lever4act = 0;
 int lever5act = 0;
 int lever6act = 0;
 int lever7act = 0;
+int woodenChairRotation = 1;
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -210,6 +211,10 @@ GLint bbox_max_uniform;
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
 
+bool isDoor1Open() {
+    return !lever1act && lever2act && !lever3act && lever4act && lever5act && !lever6act && !lever7act;
+}
+
 int main(int argc, char *argv[])
 {
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
@@ -290,6 +295,9 @@ int main(int argc, char *argv[])
     LoadTextureImage("../../data/tc-earth_nightmap_citylights.gif"); // TextureImage1
     LoadTextureImage("../../data/wall.jpg"); // WallTexture
     LoadTextureImage("../../data/floor.jpg"); // FloorTexture
+    LoadTextureImage("../../data/oak-wood.png"); // OakWoodTexture
+    LoadTextureImage("../../data/tip1.png"); // tip1Texture
+    LoadTextureImage("../../data/tip1.png"); // tip2Texture
 
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
@@ -320,6 +328,19 @@ int main(int argc, char *argv[])
     ObjModel leverModel("../../data/lever.obj");
     ComputeNormals(&leverModel);
     BuildTrianglesAndAddToVirtualScene(&leverModel);
+
+        ObjModel woodChair("../../data/woodChair.obj");
+    ComputeNormals(&woodChair);
+    BuildTrianglesAndAddToVirtualScene(&woodChair);
+
+        ObjModel woodTable("../../data/woodTable.obj");
+    ComputeNormals(&woodTable);
+    BuildTrianglesAndAddToVirtualScene(&woodTable);
+
+
+        ObjModel woodZ("../../data/woodZ.obj");
+    ComputeNormals(&woodZ);
+    BuildTrianglesAndAddToVirtualScene(&woodZ);
 
     if (argc > 1)
     {
@@ -489,8 +510,17 @@ int main(int argc, char *argv[])
 #define LEVER5 24
 #define LEVER6 25
 #define LEVER7 26
+#define WOODTABLE 27
+#define WOODCHAIR 28
+#define WOODZ1 29
+#define WOODZ2 30
+#define WOODZ3 31
+#define TIPBOARD1 32
+#define TIPBOARD2 33
 
-        door1open = !lever1act && lever2act && !lever3act && lever4act && lever5act && !lever6act && !lever7act;
+        if(isDoor1Open()) {
+            door1open = true;
+        }
 
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(-1.0f, 0.0f, 0.0f) * Matrix_Rotate_Z(0.6f) * Matrix_Rotate_X(0.2f) * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
@@ -697,6 +727,63 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, LEVER7);
         DrawVirtualObject("lever");
 
+        // desenhar TIPBOARD1
+        model = Matrix_Translate(0.0f, 1.3f, 2.49f)
+            * Matrix_Rotate_X(M_PI/2)
+            * Matrix_Rotate_Z(M_PI)
+            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, TIPBOARD1);
+        DrawVirtualObject("plane");
+
+                // desenhar WOODTABLE
+        model = Matrix_Translate(-1.0f, 0.3f, -4.0f)
+            * Matrix_Scale(0.175f, 0.175f, 0.175f)
+            * Matrix_Rotate_Y(M_PI/2);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WOODTABLE);
+        DrawVirtualObject("woodTable");
+
+                // desenhar WOODCHAIR
+        model = Matrix_Translate(-1.0f, 0.0f, -4.0f)
+            * Matrix_Scale(0.135f, 0.135f, 0.135f)
+            * Matrix_Rotate_Y(woodenChairRotation * -M_PI/2);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WOODCHAIR);
+        DrawVirtualObject("woodChair");
+
+                // desenhar WOODZ1
+        model = Matrix_Translate(7.0f, 1.8f, -0.2f)
+            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+            if(lever7act) {
+                model = model * Matrix_Rotate_Y(M_PI);
+            }
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WOODZ1);
+        DrawVirtualObject("woodZ");
+
+                        // desenhar WOODZ2
+        model = Matrix_Translate(8.0f, 1.8f, -0.2f)
+            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WOODZ2);
+        DrawVirtualObject("woodZ");
+
+                        // desenhar WOODZ3
+        model = Matrix_Translate(9.0f, 1.8f, -0.2f)
+            * Matrix_Scale(1.0f, 1.0f, 1.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WOODZ3);
+        DrawVirtualObject("woodZ");
+
+                        // desenhar TIPBOARD
+        model = Matrix_Translate(10.0f, 1.8f, -0.2f)
+            * Matrix_Rotate_Z(-M_PI/2)
+            * Matrix_Scale(0.075f, 0.075f, 0.075f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, LEVER7);
+        //DrawVirtualObject("lever");
+
 
             // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
             // passamos por todos os sistemas de coordenadas armazenados nas
@@ -871,6 +958,9 @@ int main(int argc, char *argv[])
         glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 1);
         glUniform1i(glGetUniformLocation(program_id, "WallTexture"), 2);
         glUniform1i(glGetUniformLocation(program_id, "FloorTexture"), 3);
+        glUniform1i(glGetUniformLocation(program_id, "OakWoodTexture"), 4);
+        glUniform1i(glGetUniformLocation(program_id, "Tip1Texture"), 5);
+        glUniform1i(glGetUniformLocation(program_id, "Tip2Texture"), 6);
 
         glUseProgram(0);
     }
@@ -1446,6 +1536,7 @@ int main(int argc, char *argv[])
         {
            door2open = !door2open;
            lever2act = !lever2act;
+           woodenChairRotation += 1;
         }
         if (key == GLFW_KEY_3 && action == GLFW_PRESS)
         {

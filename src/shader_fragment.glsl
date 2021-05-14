@@ -46,6 +46,13 @@ uniform mat4 projection;
 #define LEVER5 24
 #define LEVER6 25
 #define LEVER7 26
+#define WOODTABLE 27
+#define WOODCHAIR 28
+#define WOODZ1 29
+#define WOODZ2 30
+#define WOODZ3 31
+#define TIPBOARD1 32
+#define TIPBOARD2 32
 
 uniform int object_id;
 
@@ -58,6 +65,9 @@ uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
 uniform sampler2D WallTexture;
 uniform sampler2D FloorTexture;
+uniform sampler2D OakWoodTexture;
+uniform sampler2D Tip1Texture;
+uniform sampler2D Tip2Texture;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec3 color;
@@ -113,19 +123,6 @@ void main()
 
     if ( object_id == SPHERE )
     {
-        // PREENCHA AQUI as coordenadas de textura da esfera, computadas com
-        // projeção esférica EM COORDENADAS DO MODELO. Utilize como referência
-        // o slides 134-150 do documento Aula_20_Mapeamento_de_Texturas.pdf.
-        // A esfera que define a projeção deve estar centrada na posição
-        // "bbox_center" definida abaixo.
-
-        // Você deve utilizar:
-        //   função 'length( )' : comprimento Euclidiano de um vetor
-        //   função 'atan( , )' : arcotangente. Veja https://en.wikipedia.org/wiki/Atan2.
-        //   função 'asin( )'   : seno inverso.
-        //   constante M_PI
-        //   variável position_model
-
         vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
 
         vec4 p_vec = normalize(position_model - bbox_center);
@@ -148,15 +145,6 @@ void main()
     }
     else if ( object_id == BUNNY || object_id == DOOR1 || object_id == DOOR2)
     {
-        // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
-        // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
-        // o slides 99-104 do documento Aula_20_Mapeamento_de_Texturas.pdf,
-        // e também use as variáveis min*/max* definidas abaixo para normalizar
-        // as coordenadas de textura U e V dentro do intervalo [0,1]. Para
-        // tanto, veja por exemplo o mapeamento da variável 'p_v' utilizando
-        // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
-        // Veja também a Questão 4 do Questionário 4 no Moodle.
-
         float minx = bbox_min.x;
         float maxx = bbox_max.x;
 
@@ -175,9 +163,6 @@ void main()
     vec3 Kd1 = texture(TextureImage1, vec2(U,V)).rgb;
 
     color = Kd0 * (lambert + 0.01);
-    ////transição
-    if(object_id == SPHERE)
-        color += Kd1 / ((lambert+0.02) * 50);
     }
     else if (object_id == FLOOR1 || object_id == FLOOR2 || object_id == FLOOR3)
     {
@@ -185,6 +170,24 @@ void main()
         V = texcoords.y;
 
         vec3 kd0 = texture(FloorTexture, vec2(U, V)).rgb;
+        float lambert = max(0, dot(n, lightDirection));
+
+        color = kd0 + (lambert *0.01);
+    }
+    else if(object_id == TIPBOARD1) {
+        U = texcoords.x;
+        V = texcoords.y;
+
+        vec3 kd0 = texture(Tip1Texture, vec2(U, V)).rgb;
+        float lambert = max(0, dot(n, lightDirection));
+
+        color = kd0 + (lambert *0.01);
+    }
+        else if(object_id == TIPBOARD2) {
+        U = texcoords.x;
+        V = texcoords.y;
+
+        vec3 kd0 = texture(Tip2Texture, vec2(U, V)).rgb;
         float lambert = max(0, dot(n, lightDirection));
 
         color = kd0 + (lambert *0.01);
@@ -209,17 +212,26 @@ void main()
 
         color = kd0 + (lambert *0.01);
     }
-        else if (object_id == MAP)
+        else if (object_id == WOODCHAIR || object_id == WOODTABLE || object_id == WOODZ1 || object_id == WOODZ2 || object_id == WOODZ3)
     {
-        U = texcoords.x;
-        V = texcoords.y;
+        float minx = bbox_min.x;
+        float maxx = bbox_max.x;
 
-        vec3 kd0 = texture(TextureImage0, vec2(U, V)).rgb;
-        float lambert = max(0, dot(n, lightDirection));
+        float miny = bbox_min.y;
+        float maxy = bbox_max.y;
 
-        color = kd0 + (lambert *0.01);
+        float minz = bbox_min.z;
+        float maxz = bbox_max.z;
+
+        U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
+        V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
+
+    //Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+    vec3 Kd0 = texture(OakWoodTexture, vec2(U,V)).rgb;
+
+    color = Kd0 * (lambert + 0.01);
     }
-    else if ( object_id == LEVER1 || object_id == LEVER2 || object_id == LEVER3 || object_id == LEVER4
+        else if ( object_id == LEVER1 || object_id == LEVER2 || object_id == LEVER3 || object_id == LEVER4
              || object_id == LEVER5 || object_id == LEVER6 || object_id == LEVER7 )
     {
         float minx = bbox_min.x;
