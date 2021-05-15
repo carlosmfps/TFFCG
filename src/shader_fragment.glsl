@@ -53,6 +53,10 @@ uniform mat4 projection;
 #define WOODZ3 31
 #define TIPBOARD1 32
 #define TIPBOARD2 33
+#define OSCAR 34
+#define SPIDER1 35
+#define SPIDER2 36
+#define TROPHY 37
 
 uniform int object_id;
 
@@ -68,6 +72,8 @@ uniform sampler2D FloorTexture;
 uniform sampler2D OakWoodTexture;
 uniform sampler2D Tip1Texture;
 uniform sampler2D Tip2Texture;
+uniform sampler2D GoldTexture;
+uniform sampler2D SilverTexture;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec3 color;
@@ -173,6 +179,42 @@ void main()
         float lambert = max(0, dot(n, lightDirection));
 
         color = kd0 + (lambert *0.01);
+    }
+    else if(object_id == OSCAR || object_id == TROPHY) {
+        float minx = bbox_min.x;
+        float maxx = bbox_max.x;
+
+        float miny = bbox_min.y;
+        float maxy = bbox_max.y;
+
+        float minz = bbox_min.z;
+        float maxz = bbox_max.z;
+
+        U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
+        V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
+
+    //Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+    vec3 Kd0 = texture(GoldTexture, vec2(U,V)).rgb;
+
+    color = Kd0 * (lambert + 0.01);
+    }
+    else if(object_id == SPIDER1 || object_id == SPIDER2) {
+        float minx = bbox_min.x;
+        float maxx = bbox_max.x;
+
+        float miny = bbox_min.y;
+        float maxy = bbox_max.y;
+
+        float minz = bbox_min.z;
+        float maxz = bbox_max.z;
+
+        U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
+        V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
+
+    //Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
+    vec3 Kd0 = texture(SilverTexture, vec2(U,V)).rgb;
+
+    color = Kd0 * (lambert + 0.01);
     }
     else if(object_id == TIPBOARD1) {
         U = texcoords.x;

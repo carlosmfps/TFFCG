@@ -305,6 +305,8 @@ int main(int argc, char *argv[])
     LoadTextureImage("../../data/oak-wood.png"); // OakWoodTexture
     LoadTextureImage("../../data/tip1.png"); // tip1Texture
     LoadTextureImage("../../data/tip2.png"); // tip2Texture
+    LoadTextureImage("../../data/goldTexture.jpg"); //GoldTexture
+    LoadTextureImage("../../data/silverTexture.jpg"); //SilverTexture
 
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
@@ -336,18 +338,25 @@ int main(int argc, char *argv[])
     ComputeNormals(&leverModel);
     BuildTrianglesAndAddToVirtualScene(&leverModel);
 
-        ObjModel woodChair("../../data/woodChair.obj");
+    ObjModel woodChair("../../data/woodChair.obj");
     ComputeNormals(&woodChair);
     BuildTrianglesAndAddToVirtualScene(&woodChair);
 
-        ObjModel woodTable("../../data/woodTable.obj");
+    ObjModel woodTable("../../data/woodTable.obj");
     ComputeNormals(&woodTable);
     BuildTrianglesAndAddToVirtualScene(&woodTable);
 
-
-        ObjModel woodZ("../../data/woodZ.obj");
+    ObjModel woodZ("../../data/woodZ.obj");
     ComputeNormals(&woodZ);
     BuildTrianglesAndAddToVirtualScene(&woodZ);
+    
+    ObjModel oscar("../../data/oscar.obj");
+    ComputeNormals(&oscar);
+    BuildTrianglesAndAddToVirtualScene(&oscar);
+
+    ObjModel trophy("../../data/trophy.obj");
+    ComputeNormals(&trophy);
+    BuildTrianglesAndAddToVirtualScene(&trophy);
 
     if (argc > 1)
     {
@@ -524,6 +533,10 @@ int main(int argc, char *argv[])
 #define WOODZ3 31
 #define TIPBOARD1 32
 #define TIPBOARD2 33
+#define OSCAR 34
+#define SPIDER1 35
+#define SPIDER2 36
+#define TROPHY 37
 
         if(isDoor1Open()) {
             door1open = true;
@@ -795,6 +808,37 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, TIPBOARD2);
         DrawVirtualObject("plane");
 
+        // desenhar OSCAR
+        model = Matrix_Translate(0.0f, 0.0f, -12.0f) 
+            * Matrix_Scale(2.5f, 2.5f, 2.5f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, OSCAR);
+        DrawVirtualObject("oscar");
+
+        // desenhar Spider1
+        model = Matrix_Translate(1.0f, 0.0f, -11.5f) 
+            * Matrix_Scale(0.50f, 0.50f, 0.50f)
+            * Matrix_Rotate_Y(-M_PI/5);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, SPIDER1);
+        DrawVirtualObject("spider");
+
+         // desenhar Spider2
+        model = Matrix_Translate(-1.0f, 0.0f, -11.5f) 
+            * Matrix_Scale(0.50f, 0.50f, 0.50f)
+            * Matrix_Rotate_Y(M_PI/5);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, SPIDER2);
+        DrawVirtualObject("spider");
+
+        // desenhar TROPHY
+        model = Matrix_Translate(0.0f, 0.0f, -11.0f) 
+            * Matrix_Scale(0.25f, 0.25f, 0.25f)
+            * Matrix_Rotate_Y(M_PI/2);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, TROPHY);
+        DrawVirtualObject("trophy");
+
 
             // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
             // passamos por todos os sistemas de coordenadas armazenados nas
@@ -972,6 +1016,9 @@ int main(int argc, char *argv[])
         glUniform1i(glGetUniformLocation(program_id, "OakWoodTexture"), 4);
         glUniform1i(glGetUniformLocation(program_id, "Tip1Texture"), 5);
         glUniform1i(glGetUniformLocation(program_id, "Tip2Texture"), 6);
+        glUniform1i(glGetUniformLocation(program_id, "GoldTexture"), 7);
+        glUniform1i(glGetUniformLocation(program_id, "SilverTexture"), 8);
+
 
         glUseProgram(0);
     }
@@ -1573,7 +1620,7 @@ int main(int argc, char *argv[])
         {
             if(!door1open){
                 lever5act = !lever5act;
-            } else {
+            } else if(!door2open) {
                 woodenZ3Rotation += 1;
             }
         }
