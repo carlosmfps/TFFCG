@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
     ObjModel woodZ("../../data/woodZ.obj");
     ComputeNormals(&woodZ);
     BuildTrianglesAndAddToVirtualScene(&woodZ);
-    
+
     ObjModel oscar("../../data/oscar.obj");
     ComputeNormals(&oscar);
     BuildTrianglesAndAddToVirtualScene(&oscar);
@@ -537,6 +537,9 @@ int main(int argc, char *argv[])
 #define SPIDER1 35
 #define SPIDER2 36
 #define TROPHY 37
+#define ROOF1 38
+#define ROOF2 39
+#define ROOF3 40
 
         if(isDoor1Open()) {
             door1open = true;
@@ -545,10 +548,11 @@ int main(int argc, char *argv[])
             door2open = true;
         }
         // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f, 0.0f, 0.0f) * Matrix_Rotate_Z(0.6f) * Matrix_Rotate_X(0.2f) * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f);
+        model = Matrix_Translate(0.0f, 0.9f, -2.0f) * Matrix_Rotate_Z(0.6f) * Matrix_Rotate_X(0.2f) * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f) * Matrix_Scale(0.3f, 0.3f, 0.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
+
         // Desenhamos o modelo do coelho
         model = Matrix_Translate(1.0f, 0.0f, 0.0f) * Matrix_Rotate_X(g_AngleX + (float)glfwGetTime() * 0.1f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
@@ -556,25 +560,25 @@ int main(int argc, char *argv[])
         //DrawVirtualObject("Suzanne");
 
         // desenhar parede 1
-        model = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        model = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL1);
         DrawVirtualObject("plane");
 
         // desenhar parede 2
-        model = Matrix_Translate(-2.5f, 1.3f, 0.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        model = Matrix_Translate(-2.5f, 1.3f, 0.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL2);
         DrawVirtualObject("plane");
 
         // desenhar parede 3
-        model = Matrix_Translate(0.0f, 1.3f, 2.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.5f, 2.5f, 1.3f);
+        model = Matrix_Translate(0.0f, 1.3f, 2.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL3);
         DrawVirtualObject("plane");
 
         // desenhar parede 4
-        model = Matrix_Translate(-1.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 1.3f);
+        model = Matrix_Translate(-1.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL4);
         DrawVirtualObject("plane");
@@ -586,6 +590,14 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, FLOOR);
         DrawVirtualObject("plane");
 
+        // desenhar teto1
+        model = Matrix_Translate(0.0f, 3.6f, 0.0f)
+              * Matrix_Scale(2.5f, 1.0f, 2.5f)
+              * Matrix_Rotate_Z(3.1415);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, ROOF1);
+        DrawVirtualObject("plane");
+
         // desenhar porta1
         model = Matrix_Translate(1.85f, 1.0f, -2.5f) * Matrix_Rotate_Y(-M_PI/2)
               * Matrix_Scale(0.2f, 0.2f, 0.15f);
@@ -594,25 +606,25 @@ int main(int argc, char *argv[])
         if(!door1open){DrawVirtualObject("door");}
 
         // desenhar parede 5
-        model = Matrix_Translate(2.5f, 1.3f, -5.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        model = Matrix_Translate(2.5f, 1.3f, -5.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL5);
         DrawVirtualObject("plane");
 
         // desenhar parede 6
-        model = Matrix_Translate(-2.5f, 1.3f, -5.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        model = Matrix_Translate(-2.5f, 1.3f, -5.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL6);
         DrawVirtualObject("plane");
 
         // desenhar parede 7
-        model = Matrix_Translate(-1.0f, 1.3f, -2.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.0f, 2.5f, 1.3f);
+        model = Matrix_Translate(-1.0f, 1.3f, -2.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.0f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL7);
         DrawVirtualObject("plane");
 
         // desenhar parede 8
-        model = Matrix_Translate(1.35f, 1.3f, -7.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 1.3f);
+        model = Matrix_Translate(1.35f, 1.3f, -7.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL8);
         DrawVirtualObject("plane");
@@ -624,6 +636,14 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, FLOOR2);
         DrawVirtualObject("plane");
 
+        // desenhar teto2
+        model = Matrix_Translate(0.0f, 3.6f, -5.0f)
+              * Matrix_Scale(2.5f, 1.0f, 2.5f)
+              * Matrix_Rotate_Z(3.1415);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, ROOF2);
+        DrawVirtualObject("plane");
+
         // desenhar porta2
         model = Matrix_Translate(-1.5f, 1.0f, -7.5f) * Matrix_Rotate_Y(-M_PI/2)
               * Matrix_Scale(0.2f, 0.2f, 0.15f);
@@ -632,25 +652,25 @@ int main(int argc, char *argv[])
         if(!door2open){DrawVirtualObject("door");}
 
         // desenhar parede 9
-        model = Matrix_Translate(2.5f, 1.3f, -10.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        model = Matrix_Translate(2.5f, 1.3f, -10.0f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI/2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL5);
         DrawVirtualObject("plane");
 
         // desenhar parede 10
-        model = Matrix_Translate(-2.5f, 1.3f, -10.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        model = Matrix_Translate(-2.5f, 1.3f, -10.0f) *Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(-M_PI/2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL6);
         DrawVirtualObject("plane");
 
         // desenhar parede 11
-        model = Matrix_Translate(1.35f, 1.3f, -7.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.0f, 2.5f, 1.3f);
+        model = Matrix_Translate(1.35f, 1.3f, -7.5f) *  Matrix_Rotate_X(-M_PI/2) *  Matrix_Scale(2.0f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL7);
         DrawVirtualObject("plane");
 
         // desenhar parede 12
-        model = Matrix_Translate(0.0f, 1.3f, -12.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.5f, 2.5f, 1.3f);
+        model = Matrix_Translate(0.0f, 1.3f, -12.5f) * Matrix_Rotate_X(-M_PI/2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL8);
         DrawVirtualObject("plane");
@@ -660,6 +680,14 @@ int main(int argc, char *argv[])
               * Matrix_Scale(2.5f, 1.0f, 2.5f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, FLOOR2);
+        DrawVirtualObject("plane");
+
+        // desenhar teto3
+        model = Matrix_Translate(0.0f, 3.6f, -10.0f)
+              * Matrix_Scale(2.5f, 1.0f, 2.5f)
+              * Matrix_Rotate_Z(3.1415);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, ROOF3);
         DrawVirtualObject("plane");
 
         // desenhar map
@@ -766,6 +794,14 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, WOODTABLE);
         DrawVirtualObject("woodTable");
 
+                // desenhar WOODTABLE2 mesa em baixo do globo
+        model = Matrix_Translate(0.0f, 0.2f, -2.4f)
+            * Matrix_Scale(0.1f, 0.1f, 0.1f)
+            * Matrix_Rotate_Y(3.1415/2);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WOODTABLE);
+        DrawVirtualObject("woodTable");
+
                 // desenhar WOODCHAIR
         model = Matrix_Translate(-1.0f, 0.0f, -4.0f)
             * Matrix_Scale(0.135f, 0.135f, 0.135f)
@@ -799,8 +835,8 @@ int main(int argc, char *argv[])
         DrawVirtualObject("woodZ");
 
                         // desenhar TIPBOARD2
-        model = Matrix_Translate(2.49f, 1.3f, -5.0f) 
-            * Matrix_Rotate_X(-M_PI/2) 
+        model = Matrix_Translate(2.49f, 1.3f, -5.0f)
+            * Matrix_Rotate_X(-M_PI/2)
             * Matrix_Rotate_Z(M_PI/2)
             * Matrix_Rotate_Y(M_PI)
             * Matrix_Scale(1.5f, 0.75f, 0.75f);
@@ -809,14 +845,14 @@ int main(int argc, char *argv[])
         DrawVirtualObject("plane");
 
         // desenhar OSCAR
-        model = Matrix_Translate(0.0f, 0.0f, -12.0f) 
+        model = Matrix_Translate(0.0f, 0.0f, -12.0f)
             * Matrix_Scale(2.5f, 2.5f, 2.5f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, OSCAR);
         DrawVirtualObject("oscar");
 
         // desenhar Spider1
-        model = Matrix_Translate(1.0f, 0.0f, -11.5f) 
+        model = Matrix_Translate(1.0f, 0.0f, -11.5f)
             * Matrix_Scale(0.50f, 0.50f, 0.50f)
             * Matrix_Rotate_Y(-M_PI/5);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -824,7 +860,7 @@ int main(int argc, char *argv[])
         DrawVirtualObject("spider");
 
          // desenhar Spider2
-        model = Matrix_Translate(-1.0f, 0.0f, -11.5f) 
+        model = Matrix_Translate(-1.0f, 0.0f, -11.5f)
             * Matrix_Scale(0.50f, 0.50f, 0.50f)
             * Matrix_Rotate_Y(M_PI/5);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -832,7 +868,7 @@ int main(int argc, char *argv[])
         DrawVirtualObject("spider");
 
         // desenhar TROPHY
-        model = Matrix_Translate(0.0f, 0.0f, -11.0f) 
+        model = Matrix_Translate(0.0f, 0.0f, -11.0f)
             * Matrix_Scale(0.25f, 0.25f, 0.25f)
             * Matrix_Rotate_Y(M_PI/2);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
