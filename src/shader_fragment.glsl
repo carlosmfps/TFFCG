@@ -57,6 +57,9 @@ uniform mat4 projection;
 #define SPIDER1 35
 #define SPIDER2 36
 #define TROPHY 37
+#define ROOF1 38
+#define ROOF2 39
+#define ROOF3 40
 #define TIPSPHERE 41
 
 uniform int object_id;
@@ -164,6 +167,7 @@ void main()
 
     color = Kd0 * (lambert + 0.01);
     }
+    
     else if ( object_id == BUNNY || object_id == DOOR1 || object_id == DOOR2)
     {
         float minx = bbox_min.x;
@@ -191,6 +195,16 @@ void main()
         V = texcoords.y;
 
         vec3 kd0 = texture(FloorTexture, vec2(U, V)).rgb;
+        float lambert = max(0, dot(n, lightDirection));
+
+        color = kd0 + (lambert *0.01);
+    }
+        else if (object_id == ROOF1 || object_id == ROOF2 || object_id == ROOF3)
+    {
+        U = texcoords.x;
+        V = texcoords.y;
+
+        vec3 kd0 = texture(SilverTexture, vec2(U, V)).rgb;
         float lambert = max(0, dot(n, lightDirection));
 
         color = kd0 + (lambert *0.01);

@@ -118,6 +118,7 @@ void TextRendering_PrintVector(GLFWwindow *window, glm::vec4 v, float x, float y
 void TextRendering_PrintMatrixVectorProduct(GLFWwindow *window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrixVectorProductMoreDigits(GLFWwindow *window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrixVectorProductDivW(GLFWwindow *window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
+void PrintFinalMessage(GLFWwindow *window, std::string text, float scale);
 
 // Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e
 // outras informações do programa. Definidas após main().
@@ -125,6 +126,7 @@ void TextRendering_ShowModelViewProjection(GLFWwindow *window, glm::mat4 project
 void TextRendering_ShowEulerAngles(GLFWwindow *window);
 void TextRendering_ShowProjection(GLFWwindow *window);
 void TextRendering_ShowFramesPerSecond(GLFWwindow *window);
+void TextRendering_ShowControls(GLFWwindow *window);
 
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
@@ -227,6 +229,13 @@ glm::vec4 cameraOrtoVector_g = cameraUpVector_g * (-cameraViewVector_g);
 
 // Variável que controla qual câmera usaremos: look-at ou free-cam.
 bool g_lookAt = false;
+
+// Variavel que controla se exibiremos o cursor ou não
+bool isCursorEnabled = false;
+
+bool showControlMessage = false;
+
+bool endGame = false;
 
 // Variaveis de movimentação da camera Free Look
 bool g_KeyPressedW = false;
@@ -928,6 +937,32 @@ int main(int argc, char *argv[])
         // Imprimimos na tela informação sobre o número de quadros renderizados
         // por segundo (frames per second).
         TextRendering_ShowFramesPerSecond(window);
+        while (!glfwWindowShouldClose(window) && showControlMessage)
+        {
+            //Pintamos tudo de branco e reiniciamos o Z-BUFFER
+            //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glUseProgram(program_id);
+
+            PrintFinalMessage(window, "CONTROLS: \n WASD: MOVE CHARACTER\n F: TOGGLE TIP_CAM\n 1234567: TOGGLE LEVERS ON FIRST ROOM \n 2345: CHANGE CHAIR AND WALL PUZZLE POSITION ON SECOND ROOM \n ESC: QUIT GAME", 2.0f);
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+
+        if (endGame)
+            while (!glfwWindowShouldClose(window))
+            {
+                //Pintamos tudo de branco e reiniciamos o Z-BUFFER
+                glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glUseProgram(program_id);
+
+                PrintFinalMessage(window, "CONGRATULATIONS! \n YOU'VE FINISHED THE GAME\n Press ESC to close this window", 2.0f);
+
+                glfwSwapBuffers(window);
+                glfwPollEvents();
+            }
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
@@ -949,6 +984,38 @@ int main(int argc, char *argv[])
 
     // Fim do programa
     return 0;
+}
+
+void PrintFinalMessage(GLFWwindow *window, std::string text, float scale)
+{
+    float pad = TextRendering_LineHeight(window) * scale;
+    float charWidth = TextRendering_CharWidth(window) * scale;
+
+    char buffer[200];
+    int lineCount = 0;
+    std::string::size_type lastTokenPos = 0;
+    std::string::size_type nextTokenPos = 0;
+    std::vector<std::string> lines = {};
+    while (nextTokenPos != std::string::npos)
+    {
+        lineCount += 1;
+        lastTokenPos = nextTokenPos;
+        nextTokenPos = text.find_first_of("\n", lastTokenPos + 1);
+
+        lines.push_back(text.substr(lastTokenPos, nextTokenPos - lastTokenPos));
+    }
+
+    int totalLines = lines.size();
+    int currLine = 0;
+    while (lines.size() > 0)
+    {
+        std::string text = lines[lines.size() - 1];
+        snprintf(buffer, 200, text.c_str());
+        TextRendering_PrintString(window, buffer, text.size() * 0.5 * charWidth * -1, currLine * pad - totalLines * 0.5 * pad, scale);
+
+        currLine += 1;
+        lines.pop_back();
+    }
 }
 
 // Função que carrega uma imagem para ser utilizada como textura
@@ -1326,7 +1393,8 @@ bool collisionTest(glm::vec4 position)
     {
         return true;
     }
-    if(position.z >= 2.35 || position.z <= -12.35){
+    if (position.z >= 2.35 || position.z <= -12.35)
+    {
         return true;
     }
     if (!door1open)
@@ -1336,15 +1404,19 @@ bool collisionTest(glm::vec4 position)
             return true;
         }
     }
-    else if(!door2open) {
-        if (position.z <= -7.35f) {
+    else if (!door2open)
+    {
+        if (position.z <= -7.35f)
+        {
             return true;
         }
     }
-    else {
-        if(position.x <=0.5f && position.x >= -0.5f && position.z >= -11.5f && position.z <= -10.5f) {
-            printf("youwin");
-        } 
+    else
+    {
+        if (position.x <= 0.5f && position.x >= -0.5f && position.z >= -11.5f && position.z <= -10.5f)
+        {
+            endGame = true;
+        }
     }
     return false;
 }
@@ -1689,14 +1761,6 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mod)
         g_AngleZ += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
     }
 
-    // Se o usuário apertar a tecla espaço, resetamos os ângulos de Euler para zero.
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-    {
-        g_AngleX = 0.0f;
-        g_AngleY = 0.0f;
-        g_AngleZ = 0.0f;
-    }
-
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
     if (key == GLFW_KEY_P && action == GLFW_PRESS)
     {
@@ -1741,7 +1805,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mod)
     {
         if (!door1open)
         {
-            lever2act = !lever2act;
+            lever5act = !lever5act;
         }
         else if (!door2open)
         {
@@ -1752,7 +1816,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mod)
     {
         if (!door1open)
         {
-            lever3act = !lever3act;
+            lever7act = !lever7act;
         }
         else if (!door2open)
         {
@@ -1763,7 +1827,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mod)
     {
         if (!door1open)
         {
-            lever4act = !lever4act;
+            lever6act = !lever6act;
         }
         else if (!door2open)
         {
@@ -1774,7 +1838,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mod)
     {
         if (!door1open)
         {
-            lever5act = !lever5act;
+            lever4act = !lever4act;
         }
         else if (!door2open)
         {
@@ -1785,14 +1849,14 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mod)
     {
         if (!door1open)
         {
-            lever6act = !lever6act;
+            lever3act = !lever3act;
         }
     }
     if (key == GLFW_KEY_7 && action == GLFW_PRESS)
     {
         if (!door1open)
         {
-            lever7act = !lever7act;
+            lever2act = !lever2act;
         }
     }
 
@@ -1850,6 +1914,15 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mod)
         {
             g_KeyPressedA = false;
         }
+    }
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+    {
+        isCursorEnabled = !isCursorEnabled;
+        showControlMessage = !showControlMessage;
+        if (isCursorEnabled)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        else
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
 
@@ -1931,9 +2004,8 @@ void TextRendering_ShowEulerAngles(GLFWwindow *window)
     char buffer[80];
     snprintf(buffer, 80, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n", g_AngleZ, g_AngleY, g_AngleX);
 
-    TextRendering_PrintString(window, buffer, -1.0f + pad / 10, -1.0f + 2 * pad / 10, 1.0f);
+    TextRendering_PrintString(window, "Press Space to Open Controls Window", -1.0f + pad / 10, -1.0f + 2 * pad / 10, 1.0f);
 }
-
 // Escrevemos na tela qual matriz de projeção está sendo utilizada.
 void TextRendering_ShowProjection(GLFWwindow *window)
 {
