@@ -136,7 +136,7 @@ void CursorPosCallback(GLFWwindow *window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
 bool collisionTest(glm::vec4 position);
-glm::mat4 bezier(int tag);
+glm::mat4 bezierTipCurve();
 
 // Definimos uma estrutura que armazenará dados necessários para renderizar
 // cada objeto da cena virtual.
@@ -264,8 +264,8 @@ bool isDoor2Open()
     return woodenChairRotation % 4 == 1 && woodenZ1Rotation % 10 == 5 && woodenZ2Rotation % 10 == 0 && woodenZ3Rotation % 10 == 5;
 }
 
-float bezT = 0.0f;
-int bezTC = 0;
+float bezierAux = 0.0f;
+int bezierAux2 = 0;
 
 int main(int argc, char *argv[])
 {
@@ -508,7 +508,6 @@ int main(int argc, char *argv[])
             else if (g_KeyPressedD)
             {
                 g_camX_temp -= ellapsed_s * step_size * cos(g_CameraPhi) * cos(g_CameraTheta);
-                //Y nao muda
                 g_camZ_temp += ellapsed_s * step_size * cos(g_CameraPhi) * sin(g_CameraTheta);
             }
             else if (g_KeyPressedW)
@@ -519,7 +518,6 @@ int main(int argc, char *argv[])
             else if (g_KeyPressedA)
             {
                 g_camX_temp += ellapsed_s * step_size * cos(g_CameraPhi) * cos(g_CameraTheta);
-                // Y nao muda
                 g_camZ_temp -= ellapsed_s * step_size * cos(g_CameraPhi) * sin(g_CameraTheta);
             }
 
@@ -617,6 +615,7 @@ int main(int argc, char *argv[])
 #define ROOF1 38
 #define ROOF2 39
 #define ROOF3 40
+#define TIPSPHERE 41
 
         if (isDoor1Open())
         {
@@ -632,12 +631,12 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
-        // Desenhamos o modelo da esfera
-        model = bezier(SPHERE)
-              * Matrix_Scale(0.1f, 0.1f, 0.1f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, SPHERE);
-        DrawVirtualObject("sphere");
+        // Desenhamos a sphera com dica
+        model = bezierTipCurve() * Matrix_Scale(0.1f, 0.1f, 0.1f);
+        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(object_id_uniform, TIPSPHERE);
+        if (g_lookAt)
+            DrawVirtualObject("sphere");
 
         // Desenhamos o modelo do coelho
         model = Matrix_Translate(1.0f, 0.0f, 0.0f) * Matrix_Rotate_X(g_AngleX + (float)glfwGetTime() * 0.1f);
@@ -1323,74 +1322,77 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel *model)
 
 bool collisionTest(glm::vec4 position)
 {
-    std::vector<ModelScene>::iterator iter;
-    for (iter = ob_mod.begin(); iter != ob_mod.end(); ++iter)
+    if (position.x >= 2.35f || position.x <= -2.35f)
     {
-        // resgatamos a bbox do objeto inspecionado e aplicamos as transformacoes que ele sofreu
-        glm::vec3 bbox_min = g_VirtualScene[iter->name].bbox_min;
-        glm::vec3 bbox_max = g_VirtualScene[iter->name].bbox_max;
-        glm::vec4 bboxmin = glm::vec4(bbox_min.x, bbox_min.y, bbox_min.z, 1.0f) * iter->mod;
-        glm::vec4 bboxmax = glm::vec4(bbox_max.x, bbox_max.y, bbox_max.z, 1.0f) * iter->mod;
-
-        // pontoXplano interseccao com as paredes
-        if (iter->name == "plane")
+        return true;
+    }
+    if(position.z >= 2.35 || position.z <= -12.35){
+        return true;
+    }
+    if (!door1open)
+    {
+        if (position.z <= -2.35f)
         {
-            glm::vec4 plane_center = (bboxmin + bboxmax) * 0.5f;
-            glm::vec4 plane_normal = iter->normal * iter->mod;
-            position.x *= 1.005;
-            position.y *= 1.005;
-            position.z *= 1.005;
-            float coss1 = dotproduct(plane_normal, position - plane_center);
-            float coss2 = dotproduct(cameraPosition_c_g - plane_center, plane_normal);
-
-            // dentro da bbox e produto interno = 1
-            if (coss1 > 0 && coss2 < 0)
-            {
-                return true;
-            }
+            return true;
         }
+    }
+    else if(!door2open) {
+        if (position.z <= -7.35f) {
+            return true;
+        }
+    }
+    else {
+        if(position.x <=0.5f && position.x >= -0.5f && position.z >= -11.5f && position.z <= -10.5f) {
+            printf("youwin");
+        } 
     }
     return false;
 }
 
-glm::mat4 bezier(int tag)
+glm::mat4 bezierTipCurve() // Usado apenas para as duas curvas da esfera de dica da primeira sala
 {
-  if(tag == SPHERE){
-    glm::vec3 p0 = glm::vec3(-2.39f, 1.0f, 19.7f);
-    glm::vec3 p1 = glm::vec3(-2.39f, 1.0f, -1.7f);
-    glm::vec3 p2 = glm::vec3(-2.39f, 1.5f, -0.95f);
+    glm::vec3 p0 = glm::vec3(-2.39f, 1.0f, -1.7f);
+
+    glm::vec3 p1 = glm::vec3(-2.39f, 1.0f, -1.5f);
+    glm::vec3 p2 = glm::vec3(-2.39f, 1.0f, -0.95f);
+
     glm::vec3 p3 = glm::vec3(-2.39f, 1.5f, -0.95f);
-    glm::vec3 p4 = glm::vec3(-2.39f, 1.5f, -0.95f);
-    glm::vec3 p5 = glm::vec3(-2.39f, 1.2f, 0.55f);
+
+    glm::vec3 p4 = glm::vec3(-2.39f, 2.3f, -0.95f);
+    glm::vec3 p5 = glm::vec3(-2.39f, 1.2f, 0.35f);
+
     glm::vec3 p6 = glm::vec3(-2.39f, 1.2f, 0.55f);
 
-    /* flags para movimento entre as curvas */
-    if(bezT >= 2) bezTC = 1;
-    if(bezT <= 0) bezTC = 0;
+    if (bezierAux >= 2)
+        bezierAux2 = 1;
+    if (bezierAux <= 0)
+        bezierAux2 = 0;
 
-    if(bezTC == 1) bezT -= ellapsed_s * 0.125;
-    if(bezTC == 0) bezT += ellapsed_s * 0.125;
+    if (bezierAux2 == 1)
+        bezierAux -= ellapsed_s * 0.125;
+    if (bezierAux2 == 0)
+        bezierAux += ellapsed_s * 0.125;
 
-    // interpolacao da primeira curva
-    glm::vec3 c01 = p0 + bezT * (p1 - p0);
-    glm::vec3 c12 = p1 + bezT * (p2 - p1);
-    glm::vec3 c23 = p2 + bezT * (p3 - p2);
-    glm::vec3 c012 = c01 + bezT * (c12 - c01);
-    glm::vec3 c123 = c12 + bezT * (c23 - c12);
-    glm::vec3 c0123 = c012 + bezT * (c123 - c012);
-    // interpolacao da segunda curva
-    glm::vec3 c34 = p3 + (bezT-1) * (p4 - p3);
-    glm::vec3 c45 = p4 + (bezT-1) * (p5 - p4);
-    glm::vec3 c56 = p5 + (bezT-1) * (p6 - p5);
-    glm::vec3 c345 = c34 + (bezT-1) * (c45 - c34);
-    glm::vec3 c456 = c45 + (bezT-1) * (c56 - c45);
-    glm::vec3 c3456 = c345 + (bezT-1) * (c456 - c345);
+    //curva 1
+    glm::vec3 c_01 = p0 + bezierAux * (p1 - p0);
+    glm::vec3 c_12 = p1 + bezierAux * (p2 - p1);
+    glm::vec3 c_23 = p2 + bezierAux * (p3 - p2);
+    glm::vec3 c_01_12 = c_01 + bezierAux * (c_12 - c_01);
+    glm::vec3 c_12_23 = c_12 + bezierAux * (c_23 - c_12);
+    glm::vec3 c_01_12_23 = c_01_12 + bezierAux * (c_12_23 - c_01_12);
 
-    if(bezT <= 1.000) // se esta na primeira curva
-      return Matrix_Translate(c0123.x, c0123.y, c0123.z);
-    else // senao, esta na primeira curva
-      return Matrix_Translate(c3456.x, c3456.y, c3456.z);
-  }
+    //curva 1
+    glm::vec3 c_34 = p3 + (bezierAux - 1) * (p4 - p3);
+    glm::vec3 c_45 = p4 + (bezierAux - 1) * (p5 - p4);
+    glm::vec3 c_56 = p5 + (bezierAux - 1) * (p6 - p5);
+    glm::vec3 c_34_45 = c_34 + (bezierAux - 1) * (c_45 - c_34);
+    glm::vec3 c_45_56 = c_45 + (bezierAux - 1) * (c_56 - c_45);
+    glm::vec3 c_34_45_56 = c_34_45 + (bezierAux - 1) * (c_45_56 - c_34_45);
+
+    if (bezierAux <= 1.000)
+        return Matrix_Translate(c_01_12_23.x, c_01_12_23.y, c_01_12_23.z);
+    else
+        return Matrix_Translate(c_34_45_56.x, c_34_45_56.y, c_34_45_56.z);
 }
 
 // Carrega um Vertex Shader de um arquivo GLSL. Veja definição de LoadShader() abaixo.

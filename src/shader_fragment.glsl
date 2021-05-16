@@ -57,6 +57,7 @@ uniform mat4 projection;
 #define SPIDER1 35
 #define SPIDER2 36
 #define TROPHY 37
+#define TIPSPHERE 41
 
 uniform int object_id;
 
@@ -145,9 +146,23 @@ void main()
     vec3 Kd1 = texture(TextureImage1, vec2(U,V)).rgb;
 
     color = Kd0 * (lambert + 0.01);
-    ////transição
-    if(object_id == SPHERE)
-        color += Kd1 / ((lambert+0.02) * 50);
+    color += Kd1 / ((lambert+0.02) * 50);
+    }
+    else if ( object_id == TIPSPHERE )
+    {
+        vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
+
+        vec4 p_vec = normalize(position_model - bbox_center);
+
+        float theta = atan(p_vec.x, p_vec.z);
+        float phi = asin(p_vec.y);
+
+        U = (theta + M_PI)/(2*M_PI);
+        V = (phi + M_PI_2)/M_PI;
+
+    vec3 Kd0 = texture(FloorTexture, vec2(U,V)).rgb;
+
+    color = Kd0 * (lambert + 0.01);
     }
     else if ( object_id == BUNNY || object_id == DOOR1 || object_id == DOOR2)
     {
