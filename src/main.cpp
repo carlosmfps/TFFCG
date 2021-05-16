@@ -164,7 +164,7 @@ struct ModelScene
 #define ROOM3 2
 
 // construtor
-ModelScene MakeMS(std::string na, glm::mat4 ma, glm::vec4 no, int wm)
+ModelScene MakeMS(std::string na, glm::mat4 ma, glm::vec4 no)
 {
     ModelScene ms;
     ms.name = na;
@@ -179,7 +179,6 @@ ModelScene MakeMS(std::string na, glm::mat4 ma, glm::vec4 no, int wm)
     }
     ms.mod = ma;
     ms.normal = no;
-    ms.room = wm;
     return ms;
 }
 
@@ -218,9 +217,9 @@ bool g_LeftMouseButtonPressed = true;
 float g_CameraTheta = 0.0f;     // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;       // Ângulo em relação ao eixo Y
 float g_CameraDistance = 50.0f; // Distância da câmera para a origem
-float g_camX = 20.0f;           //Distancia X da camera
-float g_camY = 2.0;             // Distancia Y da camera
-float g_camZ = -6.0f;           //Distancia Z da camera
+float g_camX = 0.0f;            //Distancia X da camera
+float g_camY = 1.5f;            // Distancia Y da camera
+float g_camZ = 0.0f;            //Distancia Z da camera
 
 glm::vec4 cameraPosition_c_g = glm::vec4(2.0f, 1.0f, 0.0f, 1.0f);
 glm::vec4 cameraLookAt_l_g = glm::vec4(4.0f, 0.0f, 1.0f, 1.0f);
@@ -454,8 +453,6 @@ int main(int argc, char *argv[])
         // os shaders de vértice e fragmentos).
         glUseProgram(program_id);
 
-        //float r, y, z, x;
-
         glm::vec4 cameraPosition_c;
         glm::vec4 cameraLookAt_l;
         glm::vec4 cameraViewVector;
@@ -468,7 +465,7 @@ int main(int argc, char *argv[])
         float y = r * sin(g_CameraPhi);
         float z = r * cos(g_CameraPhi) * cos(g_CameraTheta);
         float x = r * cos(g_CameraPhi) * sin(g_CameraTheta);
-        float step_size = 0.001f;
+        float step_size = 0.0003f;
         float g_camX_temp = g_camX; //Distancia X da camera
         float g_camY_temp = g_camY; // Distancia Y da camera
         float g_camZ_temp = g_camZ; //Distancia Z da camera
@@ -515,7 +512,7 @@ int main(int argc, char *argv[])
                 g_camZ = g_camZ_temp;
             }
 
-            cameraPosition_c_x = glm::vec4(g_camX,g_camY,g_camZ,1.0f);
+            cameraPosition_c_x = glm::vec4(g_camX, g_camY, g_camZ, 1.0f);
             cameraLookAt_l_x = cameraLookAt_l_g;
             cameraUpVector_x = cameraUpVector_g;
         }
@@ -634,6 +631,7 @@ int main(int argc, char *argv[])
         model = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL1);
+        MakeMS("plane", model, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f), ROOM1);
         DrawVirtualObject("plane");
 
         // desenhar parede 2
@@ -667,7 +665,7 @@ int main(int argc, char *argv[])
         DrawVirtualObject("plane");
 
         // desenhar porta1
-        model = Matrix_Translate(1.85f, 1.0f, -2.5f) * Matrix_Rotate_Y(-M_PI / 2) * Matrix_Scale(0.2f, 0.2f, 0.15f);
+        model = Matrix_Translate(1.85f, 1.0f, -2.5f) * Matrix_Rotate_Y(-M_PI / 2) * Matrix_Scale(0.2f, 0.7f, 0.15f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(object_id_uniform, DOOR1);
         if (!door1open)
@@ -712,7 +710,7 @@ int main(int argc, char *argv[])
         DrawVirtualObject("plane");
 
         // desenhar porta2
-        model = Matrix_Translate(-1.5f, 1.0f, -7.5f) * Matrix_Rotate_Y(-M_PI / 2) * Matrix_Scale(0.2f, 0.2f, 0.15f);
+        model = Matrix_Translate(-1.5f, 1.0f, -7.5f) * Matrix_Rotate_Y(-M_PI / 2) * Matrix_Scale(0.2f, 0.7f, 0.15f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(object_id_uniform, DOOR2);
         if (!door2open)
@@ -1324,49 +1322,23 @@ bool collisionTest(glm::vec4 position)
         glm::vec4 bboxmin = glm::vec4(bbox_min.x, bbox_min.y, bbox_min.z, 1.0f) * iter->mod;
         glm::vec4 bboxmax = glm::vec4(bbox_max.x, bbox_max.y, bbox_max.z, 1.0f) * iter->mod;
 
-        // // pontoXcubo interseccao com as pedras
-        // if(iter->name == "stone_blocks_01" && iter->maze == maze_state){
-        //   if(position.x+0.09 >= bboxmin.x && position.y+0.09 >= bboxmin.y && position.z+0.09 >= bboxmin.z &&
-        //     position.x-0.09 <= bboxmax.x && position.y-0.09 <= bboxmax.y && position.z-0.09 <= bboxmax.z){
-        //     return true;
-        //   }
-        // }
         // pontoXplano interseccao com as paredes
         if (iter->name == "plane")
         {
-            glm::vec4 plane_center = (bboxmin + bboxmax) * 0.5f;
+            glm::vec4 plane_center = (bboxmin + bboxmax) * 0.005f;
             glm::vec4 plane_normal = iter->normal * iter->mod;
-            // coloquei uma folguinha pra nao aparecer alem e ficar feio
-            position.x *= 1.005;
-            position.y *= 1.005;
-            position.z *= 1.005;
+            position.x *= 1.0005;
+            position.y *= 1.0005;
+            position.z *= 1.0005;
             float coss1 = dotproduct(plane_normal, position - plane_center);
             float coss2 = dotproduct(cameraPosition_c_g - plane_center, plane_normal);
 
             // dentro da bbox e produto interno = 1
             if (coss1 >= 0 && coss2 <= 0)
             {
-                return false;
+                return true;
             }
         }
-        // // cuboXcubo interseccao com o ganso
-        // if(iter->name == "goose"){
-        //   // usa a bbox do objeto do finn
-        //   glm::vec3 finn_bboxmin = g_VirtualScene["finn"].bbox_min;
-        //   glm::vec3 finn_bboxmax = g_VirtualScene["finn"].bbox_max;
-        //   glm::vec3 posmin, posmax;
-        //   posmin.x = position.x + finn_bboxmin.x * 0.3;
-        //   posmin.y = position.y + finn_bboxmin.y * 0.3;
-        //   posmin.z = position.z + finn_bboxmin.z * 0.3;
-        //   posmax.x = position.x + finn_bboxmax.x * 0.3;
-        //   posmax.y = position.y + finn_bboxmax.y * 0.3;
-        //   posmax.z = position.z + finn_bboxmax.z * 0.3;
-
-        //   if(posmax.x >= bboxmin.x && posmax.y >= bboxmin.y && posmax.z >= bboxmin.z &&
-        //     posmin.x <= bboxmax.x && posmin.y <= bboxmax.y && posmin.z <= bboxmax.z){
-        //     return true;
-        //   }
-        // }
     }
     return false;
 }
