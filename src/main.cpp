@@ -136,6 +136,7 @@ void CursorPosCallback(GLFWwindow *window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
 bool collisionTest(glm::vec4 position);
+glm::mat4 bezier(int tag);
 
 // Definimos uma estrutura que armazenará dados necessários para renderizar
 // cada objeto da cena virtual.
@@ -262,6 +263,9 @@ bool isDoor2Open()
 {
     return woodenChairRotation % 4 == 1 && woodenZ1Rotation % 10 == 5 && woodenZ2Rotation % 10 == 0 && woodenZ3Rotation % 10 == 5;
 }
+
+float bezT = 0.0f;
+int bezTC = 0;
 
 int main(int argc, char *argv[])
 {
@@ -480,7 +484,7 @@ int main(int argc, char *argv[])
         float y = r * sin(g_CameraPhi);
         float z = r * cos(g_CameraPhi) * cos(g_CameraTheta);
         float x = r * cos(g_CameraPhi) * sin(g_CameraTheta);
-        float step_size = 0.0003f;
+        float step_size = 2.0f;
         float g_camX_temp = g_camX; //Distancia X da camera
         float g_camY_temp = g_camY; // Distancia Y da camera
         float g_camZ_temp = g_camZ; //Distancia Z da camera
@@ -546,6 +550,8 @@ int main(int argc, char *argv[])
 
         // Agora computamos a matriz de Projeção.
         glm::mat4 projection;
+
+        p_seconds = seconds;
 
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
@@ -623,6 +629,13 @@ int main(int argc, char *argv[])
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(0.0f, 0.9f, -2.0f) * Matrix_Rotate_Z(0.6f) * Matrix_Rotate_X(0.2f) * Matrix_Rotate_Y(g_AngleY + (float)glfwGetTime() * 0.1f) * Matrix_Scale(0.3f, 0.3f, 0.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(object_id_uniform, SPHERE);
+        DrawVirtualObject("sphere");
+
+        // Desenhamos o modelo da esfera
+        model = bezier(SPHERE)
+              * Matrix_Scale(0.1f, 0.1f, 0.1f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
@@ -1338,6 +1351,46 @@ bool collisionTest(glm::vec4 position)
         }
     }
     return false;
+}
+
+glm::mat4 bezier(int tag)
+{
+  if(tag == SPHERE){
+    glm::vec3 p0 = glm::vec3(-2.39f, 1.0f, 19.7f);
+    glm::vec3 p1 = glm::vec3(-2.39f, 1.0f, -1.7f);
+    glm::vec3 p2 = glm::vec3(-2.39f, 1.5f, -0.95f);
+    glm::vec3 p3 = glm::vec3(-2.39f, 1.5f, -0.95f);
+    glm::vec3 p4 = glm::vec3(-2.39f, 1.5f, -0.95f);
+    glm::vec3 p5 = glm::vec3(-2.39f, 1.2f, 0.55f);
+    glm::vec3 p6 = glm::vec3(-2.39f, 1.2f, 0.55f);
+
+    /* flags para movimento entre as curvas */
+    if(bezT >= 2) bezTC = 1;
+    if(bezT <= 0) bezTC = 0;
+
+    if(bezTC == 1) bezT -= ellapsed_s * 0.125;
+    if(bezTC == 0) bezT += ellapsed_s * 0.125;
+
+    // interpolacao da primeira curva
+    glm::vec3 c01 = p0 + bezT * (p1 - p0);
+    glm::vec3 c12 = p1 + bezT * (p2 - p1);
+    glm::vec3 c23 = p2 + bezT * (p3 - p2);
+    glm::vec3 c012 = c01 + bezT * (c12 - c01);
+    glm::vec3 c123 = c12 + bezT * (c23 - c12);
+    glm::vec3 c0123 = c012 + bezT * (c123 - c012);
+    // interpolacao da segunda curva
+    glm::vec3 c34 = p3 + (bezT-1) * (p4 - p3);
+    glm::vec3 c45 = p4 + (bezT-1) * (p5 - p4);
+    glm::vec3 c56 = p5 + (bezT-1) * (p6 - p5);
+    glm::vec3 c345 = c34 + (bezT-1) * (c45 - c34);
+    glm::vec3 c456 = c45 + (bezT-1) * (c56 - c45);
+    glm::vec3 c3456 = c345 + (bezT-1) * (c456 - c345);
+
+    if(bezT <= 1.000) // se esta na primeira curva
+      return Matrix_Translate(c0123.x, c0123.y, c0123.z);
+    else // senao, esta na primeira curva
+      return Matrix_Translate(c3456.x, c3456.y, c3456.z);
+  }
 }
 
 // Carrega um Vertex Shader de um arquivo GLSL. Veja definição de LoadShader() abaixo.
