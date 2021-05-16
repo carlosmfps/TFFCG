@@ -159,10 +159,6 @@ struct ModelScene
     int room;         // indica a qual sala o bloco pertence
 };
 
-#define ROOM1 0
-#define ROOM2 1
-#define ROOM3 2
-
 // construtor
 ModelScene MakeMS(std::string na, glm::mat4 ma, glm::vec4 no)
 {
@@ -631,7 +627,6 @@ int main(int argc, char *argv[])
         model = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL1);
-        MakeMS("plane", model, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f), ROOM1);
         DrawVirtualObject("plane");
 
         // desenhar parede 2
