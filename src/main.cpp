@@ -179,6 +179,7 @@ ModelScene MakeMS(std::string na, glm::mat4 ma, glm::vec4 no)
 }
 
 std::vector<ModelScene> ob_mod;
+
 float p_seconds = (float)glfwGetTime();
 float seconds;
 float ellapsed_s;
@@ -217,7 +218,7 @@ float g_camX = 0.0f;            //Distancia X da camera
 float g_camY = 1.5f;            // Distancia Y da camera
 float g_camZ = 0.0f;            //Distancia Z da camera
 
-glm::vec4 cameraPosition_c_g = glm::vec4(2.0f, 1.0f, 0.0f, 1.0f);
+glm::vec4 cameraPosition_c_g = glm::vec4(g_camX, g_camY, g_camZ, 1.0f);
 glm::vec4 cameraLookAt_l_g = glm::vec4(4.0f, 0.0f, 1.0f, 1.0f);
 glm::vec4 cameraViewVector_g = cameraLookAt_l_g - cameraPosition_c_g;
 glm::vec4 cameraUpVector_g = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
@@ -403,6 +404,24 @@ int main(int argc, char *argv[])
         BuildTrianglesAndAddToVirtualScene(&model);
     }
 
+    glm::mat4 m = Matrix_Identity();
+
+    //desenhar parede 1
+    m = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
+    ob_mod.push_back(MakeMS("plane", m, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f)));
+
+    // desenhar parede 2
+    m = Matrix_Translate(-2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
+    ob_mod.push_back(MakeMS("plane", m, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f)));
+
+    // desenhar parede 3
+    m = Matrix_Translate(0.0f, 1.3f, 2.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
+    ob_mod.push_back(MakeMS("plane", m, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f)));
+
+    // desenhar parede 4
+    m = Matrix_Translate(-1.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.0f, 2.5f, 2.3f);
+    ob_mod.push_back(MakeMS("plane", m, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f)));
+
     // Inicializamos o código para renderização de texto.
     TextRendering_Init();
 
@@ -515,7 +534,8 @@ int main(int argc, char *argv[])
 
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        cameraPosition_c = cameraPosition_c_x;                // Ponto "c", centro da câmera
+        cameraPosition_c = cameraPosition_c_x; // Ponto "c", centro da câmera
+        cameraPosition_c_g = cameraPosition_c_x;
         cameraLookAt_l = cameraLookAt_l_x;                    // Ponto "l", para onde a câmera (look-at) estará sempre olhando
         cameraViewVector = cameraLookAt_l - cameraPosition_c; // Vetor "view", sentido para onde a câmera está virada
         cameraUpVector = cameraUpVector_x;                    // Vetor "up" fixado para apontar para o "céu" (eito Y global)
@@ -563,20 +583,9 @@ int main(int argc, char *argv[])
 
 #define SPHERE 0
 #define BUNNY 1
-#define WALL1 2
-#define WALL2 3
-#define WALL3 4
-#define WALL4 5
+#define WALL 2
 #define FLOOR 6
-#define WALL5 7
-#define WALL6 8
-#define WALL7 9
-#define WALL8 10
 #define FLOOR2 11
-#define WALL9 12
-#define WALL10 13
-#define WALL11 14
-#define WALL12 15
 #define FLOOR3 16
 #define DOOR1 17
 #define DOOR2 18
@@ -623,28 +632,28 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, BUNNY);
         //DrawVirtualObject("Suzanne");
 
-        // desenhar parede 1
+        //desenhar parede 1
         model = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL1);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar parede 2
         model = Matrix_Translate(-2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL2);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar parede 3
         model = Matrix_Translate(0.0f, 1.3f, 2.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL3);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar parede 4
         model = Matrix_Translate(-1.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL4);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar chao
@@ -671,25 +680,25 @@ int main(int argc, char *argv[])
         // desenhar parede 5
         model = Matrix_Translate(2.5f, 1.3f, -5.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL5);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar parede 6
         model = Matrix_Translate(-2.5f, 1.3f, -5.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL6);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar parede 7
         model = Matrix_Translate(-1.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.0f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL7);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar parede 8
         model = Matrix_Translate(1.35f, 1.3f, -7.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.0f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL8);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar chao2
@@ -716,25 +725,25 @@ int main(int argc, char *argv[])
         // desenhar parede 9
         model = Matrix_Translate(2.5f, 1.3f, -10.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL5);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar parede 10
         model = Matrix_Translate(-2.5f, 1.3f, -10.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL6);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar parede 11
         model = Matrix_Translate(1.35f, 1.3f, -7.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.0f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL7);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar parede 12
         model = Matrix_Translate(0.0f, 1.3f, -12.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(M_PI) * Matrix_Scale(2.5f, 2.5f, 2.3f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL8);
+        glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("plane");
 
         // desenhar chao3
@@ -896,13 +905,6 @@ int main(int argc, char *argv[])
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(object_id_uniform, TROPHY);
         DrawVirtualObject("trophy");
-
-        // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
-        // passamos por todos os sistemas de coordenadas armazenados nas
-        // matrizes the_model, the_view, e the_projection; e escrevemos na tela
-        // as matrizes e pontos resultantes dessas transformações.
-        //glm::vec4 p_model(0.5f, 0.5f, 0.5f, 1.0f);
-        //TextRendering_ShowModelViewProjection(window, projection, view, model, p_model);
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
@@ -1320,16 +1322,16 @@ bool collisionTest(glm::vec4 position)
         // pontoXplano interseccao com as paredes
         if (iter->name == "plane")
         {
-            glm::vec4 plane_center = (bboxmin + bboxmax) * 0.005f;
+            glm::vec4 plane_center = (bboxmin + bboxmax) * 0.5f;
             glm::vec4 plane_normal = iter->normal * iter->mod;
-            position.x *= 1.0005;
-            position.y *= 1.0005;
-            position.z *= 1.0005;
+            position.x *= 1.005;
+            position.y *= 1.005;
+            position.z *= 1.005;
             float coss1 = dotproduct(plane_normal, position - plane_center);
             float coss2 = dotproduct(cameraPosition_c_g - plane_center, plane_normal);
 
             // dentro da bbox e produto interno = 1
-            if (coss1 >= 0 && coss2 <= 0)
+            if (coss1 > 0 && coss2 < 0)
             {
                 return true;
             }
