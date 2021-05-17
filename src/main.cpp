@@ -5,21 +5,12 @@
 //    INF01047 Fundamentos de Computação Gráfica
 //               Prof. Eduardo Gastal
 //
-//                   TRABALHO FINAL
+//                   TRABALHO FINAL - Carlos Santiago e Gabriel Martins
 //
-
-// Arquivos "headers" padrões de C podem ser incluídos em um
-// programa C++, sendo necessário somente adicionar o caractere
-// "c" antes de seu nome, e remover o sufixo ".h". Exemplo:
-//    #include <stdio.h> // Em C
-//  vira
-//    #include <cstdio> // Em C++
 
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-
-// Headers abaixo são específicos de C++
 #include <map>
 #include <stack>
 #include <string>
@@ -153,36 +144,6 @@ struct SceneObject
     glm::vec3 bbox_max;
 };
 
-//estrutura para guardar informacoes uteis no teste de colisao
-struct ModelScene
-{
-    std::string name; // nome do objeto
-    glm::mat4 mod;    // matriz de modificacoes que ele sofreu
-    glm::vec4 normal; // normal retirada de um dos triangulos para o plano
-    int room;         // indica a qual sala o bloco pertence
-};
-
-// construtor
-ModelScene MakeMS(std::string na, glm::mat4 ma, glm::vec4 no)
-{
-    ModelScene ms;
-    ms.name = na;
-
-    float aux;
-    int i;
-    for (i = 0; i < 4; i++) // troca a ultima linha pela ultima coluna para translacao
-    {
-        aux = ma[3][i];
-        ma[3][i] = ma[i][3];
-        ma[i][3] = aux;
-    }
-    ms.mod = ma;
-    ms.normal = no;
-    return ms;
-}
-
-std::vector<ModelScene> ob_mod;
-
 float p_seconds = (float)glfwGetTime();
 float seconds;
 float ellapsed_s;
@@ -294,10 +255,6 @@ int main(int argc, char *argv[])
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
     // Pedimos para utilizar o perfil "core", isto é, utilizaremos somente as
     // funções modernas de OpenGL.
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -367,10 +324,6 @@ int main(int argc, char *argv[])
     ComputeNormals(&spheremodel);
     BuildTrianglesAndAddToVirtualScene(&spheremodel);
 
-    ObjModel SuzanneModel("../../data/Suzanne.obj");
-    ComputeNormals(&SuzanneModel);
-    BuildTrianglesAndAddToVirtualScene(&SuzanneModel);
-
     ObjModel planemodel("../../data/plane.obj");
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
@@ -418,22 +371,6 @@ int main(int argc, char *argv[])
     }
 
     glm::mat4 m = Matrix_Identity();
-
-    //desenhar parede 1
-    m = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
-    ob_mod.push_back(MakeMS("plane", m, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f)));
-
-    // desenhar parede 2
-    m = Matrix_Translate(-2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
-    ob_mod.push_back(MakeMS("plane", m, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f)));
-
-    // desenhar parede 3
-    m = Matrix_Translate(0.0f, 1.3f, 2.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
-    ob_mod.push_back(MakeMS("plane", m, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f)));
-
-    // desenhar parede 4
-    m = Matrix_Translate(-1.0f, 1.3f, -2.5f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Scale(2.0f, 2.5f, 2.3f);
-    ob_mod.push_back(MakeMS("plane", m, glm::vec4(planemodel.attrib.normals[0], planemodel.attrib.normals[1], planemodel.attrib.normals[2], 0.0f)));
 
     // Inicializamos o código para renderização de texto.
     TextRendering_Init();
@@ -563,7 +500,7 @@ int main(int argc, char *argv[])
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;     // Posição do "near plane"
-        float farplane = -100000.0f; // Posição do "far plane"
+        float farplane = -10000.0f; // Posição do "far plane"
 
         if (g_UsePerspectiveProjection)
         {
@@ -646,12 +583,6 @@ int main(int argc, char *argv[])
         glUniform1i(object_id_uniform, TIPSPHERE);
         if (g_lookAt)
             DrawVirtualObject("sphere");
-
-        // Desenhamos o modelo do coelho
-        model = Matrix_Translate(1.0f, 0.0f, 0.0f) * Matrix_Rotate_X(g_AngleX + (float)glfwGetTime() * 0.1f);
-        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BUNNY);
-        //DrawVirtualObject("Suzanne");
 
         //desenhar parede 1
         model = Matrix_Translate(2.5f, 1.3f, 0.0f) * Matrix_Rotate_X(-M_PI / 2) * Matrix_Rotate_Z(M_PI / 2) * Matrix_Scale(2.5f, 2.5f, 2.3f);
@@ -964,18 +895,8 @@ int main(int argc, char *argv[])
                 glfwPollEvents();
             }
 
-        // O framebuffer onde OpenGL executa as operações de renderização não
-        // é o mesmo que está sendo mostrado para o usuário, caso contrário
-        // seria possível ver artefatos conhecidos como "screen tearing". A
-        // chamada abaixo faz a troca dos buffers, mostrando para o usuário
-        // tudo que foi renderizado pelas funções acima.
-        // Veja o link: Veja o link: https://en.wikipedia.org/w/index.php?title=Multiple_buffering&oldid=793452829#Double_buffering_in_computer_graphics
         glfwSwapBuffers(window);
 
-        // Verificamos com o sistema operacional se houve alguma interação do
-        // usuário (teclado, mouse, ...). Caso positivo, as funções de callback
-        // definidas anteriormente usando glfwSet*Callback() serão chamadas
-        // pela biblioteca GLFW.
         glfwPollEvents();
     }
 
@@ -1044,7 +965,6 @@ void LoadTextureImage(const char *filename)
     glGenTextures(1, &texture_id);
     glGenSamplers(1, &sampler_id);
 
-    // Veja slides 95-96 do documento Aula_20_Mapeamento_de_Texturas.pdf
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -1292,11 +1212,6 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel *model)
                 bbox_max.y = std::max(bbox_max.y, vy);
                 bbox_max.z = std::max(bbox_max.z, vz);
 
-                // Inspecionando o código da tinyobjloader, o aluno Bernardo
-                // Sulzbach (2017/1) apontou que a maneira correta de testar se
-                // existem normais e coordenadas de textura no ObjModel é
-                // comparando se o índice retornado é -1. Fazemos isso abaixo.
-
                 if (idx.normal_index != -1)
                 {
                     const float nx = model->attrib.normals[3 * idx.normal_index + 0];
@@ -1379,8 +1294,6 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel *model)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(GLuint), indices.data());
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // XXX Errado!
-    //
 
     // "Desligamos" o VAO, evitando assim que operações posteriores venham a
     // alterar o mesmo. Isso evita bugs.
