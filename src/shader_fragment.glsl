@@ -115,6 +115,7 @@ void main()
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
 
+    vec4 h = normalize(v + l);
     float q; // Expoente especular para o modelo de iluminação de Blinn-Phong
 
     // Coordenadas de textura U e V
@@ -210,22 +211,17 @@ void main()
         color = kd0 + (lambert *0.01);
     }
     else if(object_id == OSCAR || object_id == TROPHY) {
-        float minx = bbox_min.x;
-        float maxx = bbox_max.x;
 
-        float miny = bbox_min.y;
-        float maxy = bbox_max.y;
+        Kd = vec3(0.8, 0.8784, 0.0941); //Refletancia difusa
+        Ks = vec3(0.8784, 0.6941, 0.0941); //Refletancia especular
+        Ka = vec3(0.5098, 0.5451, 0.1804); //Refletancia ambiente
+        q = 90.0;
 
-        float minz = bbox_min.z;
-        float maxz = bbox_max.z;
+        vec3 lambert_diffuse_term = Kd*I*max(0.0f, dot(n,l)); // Termo difuso de Lambert utilizando a lei dos cossenos de Lambert
+        vec3 ambient_term = Ka*Ia; // Termo ambiente
+        vec3 blinn_phong_specular_term  = Ks*I*pow(dot(n, h), q); // Termo especular utilizando o modelo de iluminação de Blinn-Phong
 
-        U = (position_model.x - bbox_min.x) / (bbox_max.x - bbox_min.x);
-        V = (position_model.y - bbox_min.y) / (bbox_max.y - bbox_min.y);
-
-    //Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
-    vec3 Kd0 = texture(GoldTexture, vec2(U,V)).rgb;
-
-    color = Kd0 * (lambert + 0.01);
+        color = lambert_diffuse_term + ambient_term + blinn_phong_specular_term;
     }
     else if(object_id == SPIDER1 || object_id == SPIDER2) {
         float minx = bbox_min.x;
